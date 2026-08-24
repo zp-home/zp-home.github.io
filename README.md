@@ -40,4 +40,10 @@ npm run build
 
 ## 部署
 
-`.github/workflows/deploy.yml` 会在 `main` 分支更新时构建站点，并通过 GitHub Pages Actions 发布 `dist/`。首次推送后，在仓库的 **Settings > Pages > Build and deployment** 中选择 **GitHub Actions**。
+`main` 分支保存站点源码，`gh-pages` 分支只保存生成后的静态文件。发布时执行：
+
+```bash
+npm run deploy
+```
+
+该命令会先执行完整检查和生产构建，再把 `dist/` 推送到 `gh-pages`。GitHub Pages 的发布来源应设为 **Deploy from a branch**，分支为 `gh-pages`，目录为 `/ (root)`。
