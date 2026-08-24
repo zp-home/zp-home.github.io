@@ -1,0 +1,62 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content'
+import { ArrowLeft, ArrowUpRight } from 'lucide-astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { formatDate } from '../../utils/content'
+
+export async function getStaticPaths() {
+  const entries = await getCollection('knowledge')
+  return entries.map((entry) => ({ params: { id: entry.id }, props: { entry } }))
+}
+
+interface Props {
+  entry: CollectionEntry<'knowledge'>
+}
+
+const { entry } = Astro.props
+const { Content } = await render(entry)
+---
+
+<BaseLayout title={`${entry.data.title} | zp-home`} description={entry.data.summary}>
+  <article class="article-shell">
+    <header class="article-header">
+      <a class="back-link" href="/knowledge/"><ArrowLeft size={16} /> Knowledge</a>
+      <p class="eyebrow">Knowledge note</p>
+      <h1>{entry.data.title}</h1>
+      <p class="article-header__summary">{entry.data.summary}</p>
+      <div class="article-meta">
+        <span>{formatDate(entry.data.date)}</span>
+        <span>{entry.data.readingTime}</span>
+        <span>{entry.data.tags.join(' / ')}</span>
+      </div>
+      {entry.data.source && (
+        <a class="source-link" href={entry.data.source} target="_blank" rel="noreferrer">查看公开来源 <ArrowUpRight size={15} /></a>
+      )}
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 48px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 650;
+  }
+
+  .source-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 24px;
+    color: var(--cyan);
+    font-size: 14px;
+    font-weight: 680;
+  }
+</style>

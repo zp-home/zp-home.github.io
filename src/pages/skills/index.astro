@@ -1,0 +1,53 @@
+---
+import { getCollection } from 'astro:content'
+import { ArrowRight, Github } from 'lucide-astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { byNewest } from '../../utils/content'
+
+const skills = (await getCollection('skills')).sort(byNewest)
+---
+
+<BaseLayout title="Skills | zp-home" description="可复用的 Agent Skills、触发场景与能力边界。">
+  <header class="page-intro shell">
+    <p class="eyebrow">Skills</p>
+    <h1>把一次经验变成可复用流程</h1>
+    <p class="page-intro__copy">每项 Skill 都说明何时触发、如何执行、需要哪些资源，以及什么结果才算完成。</p>
+  </header>
+
+  <section class="section--compact shell">
+    <div class="content-list">
+      {skills.map((skill) => (
+        <article class="content-row">
+          <div class="content-row__meta">
+            <div>{skill.data.kind}</div>
+            <div>{skill.data.triggers.join(' / ')}</div>
+          </div>
+          <div>
+            <h2><a href={`/skills/${skill.id}/`}>{skill.data.title}</a></h2>
+            <p>{skill.data.summary}</p>
+            <ul class="tag-list skill-tags">
+              {skill.data.tags.map((tag) => <li class="tag">{tag}</li>)}
+            </ul>
+          </div>
+          <div class="row-actions">
+            {skill.data.repository && (
+              <a class="icon-button" href={skill.data.repository} target="_blank" rel="noreferrer" title="GitHub" aria-label={`${skill.data.title} GitHub`}><Github size={18} /></a>
+            )}
+            <a class="icon-button" href={`/skills/${skill.id}/`} title="查看" aria-label={`查看 ${skill.data.title}`}><ArrowRight size={18} /></a>
+          </div>
+        </article>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .skill-tags {
+    margin-top: 16px;
+  }
+
+  .row-actions {
+    display: flex;
+    gap: 8px;
+  }
+</style>

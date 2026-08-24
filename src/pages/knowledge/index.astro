@@ -1,0 +1,67 @@
+---
+import { getCollection } from 'astro:content'
+import { ArrowRight, Search } from 'lucide-astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { byNewest, formatDate } from '../../utils/content'
+
+const entries = (await getCollection('knowledge')).sort(byNewest)
+---
+
+<BaseLayout title="Knowledge | zp-home" description="来自项目实践、Agent Skills 与强化学习实验的知识记录。">
+  <header class="page-intro shell">
+    <p class="eyebrow">Knowledge</p>
+    <h1>记录判断，不只记录结论</h1>
+    <p class="page-intro__copy">每篇内容尽量保留问题、约束、替代方案和验证证据，方便以后更新而不是重新猜一次。</p>
+  </header>
+
+  <section class="section--compact shell">
+    <label class="search-box" for="knowledge-search">
+      <Search size={18} aria-hidden="true" />
+      <input id="knowledge-search" type="search" placeholder="搜索标题、摘要或标签" autocomplete="off" />
+    </label>
+
+    <div class="content-list" id="knowledge-list">
+      {entries.map((entry) => (
+        <article class="content-row" data-search={`${entry.data.title} ${entry.data.summary} ${entry.data.tags.join(' ')}`.toLowerCase()}>
+          <span class="content-row__meta">{formatDate(entry.data.date)} · {entry.data.readingTime}</span>
+          <div>
+            <h2><a href={`/knowledge/${entry.id}/`}>{entry.data.title}</a></h2>
+            <p>{entry.data.summary}</p>
+            <ul class="tag-list knowledge-tags">
+              {entry.data.tags.map((tag) => <li class="tag">{tag}</li>)}
+            </ul>
+          </div>
+          <a class="icon-button" href={`/knowledge/${entry.id}/`} title="阅读" aria-label={`阅读 ${entry.data.title}`}><ArrowRight size={18} /></a>
+        </article>
+      ))}
+    </div>
+    <p class="empty-state" id="knowledge-empty">没有匹配的知识条目。</p>
+  </section>
+</BaseLayout>
+
+<script>
+  const input = document.querySelector<HTMLInputElement>('#knowledge-search')
+  const rows = [...document.querySelectorAll<HTMLElement>('[data-search]')]
+  const empty = document.querySelector<HTMLElement>('#knowledge-empty')
+
+  input?.addEventListener('input', () => {
+    const query = input.value.trim().toLowerCase()
+    let visible = 0
+    for (const row of rows) {
+      const matches = query.length === 0 || row.dataset.search?.includes(query)
+      row.hidden = !matches
+      if (matches) visible += 1
+    }
+    if (empty) empty.style.display = visible === 0 ? 'block' : 'none'
+  })
+</script>
+
+<style>
+  .content-row[hidden] {
+    display: none;
+  }
+
+  .knowledge-tags {
+    margin-top: 16px;
+  }
+</style>

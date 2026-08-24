@@ -1,0 +1,64 @@
+---
+import { ArrowUpRight, Github } from 'lucide-astro'
+import { site } from '../data/site'
+---
+
+<footer class="site-footer">
+  <div class="shell footer-grid">
+    <div>
+      <p class="footer-title">zp-home</p>
+      <p class="footer-copy">公开作品、可复用能力与持续更新的技术笔记。</p>
+    </div>
+    <div class="footer-links">
+      <a href={site.github} target="_blank" rel="noreferrer">
+        <Github size={17} /> GitHub <ArrowUpRight size={15} />
+      </a>
+      <a href="/knowledge/">Knowledge</a>
+      <a href="/skills/">Skills</a>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .site-footer {
+    padding-block: 46px;
+    border-top: 1px solid var(--line);
+  }
+
+  .footer-grid {
+    display: flex;
+    justify-content: space-between;
+    gap: 32px;
+  }
+
+  .footer-title {
+    margin: 0 0 6px;
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-weight: 750;
+  }
+
+  .footer-copy {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .footer-links {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+  }
+
+  .footer-links a {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 620;
+  }
+
+  @media (max-width: 640px) {
+    .footer-grid {
+      flex-direction: column;
+    }
+  }
+</style>

@@ -1,0 +1,415 @@
+---
+import { getCollection } from 'astro:content'
+import { ArrowRight, BookOpen, Github, Layers3, PackageCheck, Wrench } from 'lucide-astro'
+import ProjectCard from '../components/ProjectCard.astro'
+import BaseLayout from '../layouts/BaseLayout.astro'
+import { site } from '../data/site'
+import { byNewest, formatDate } from '../utils/content'
+
+const projects = (await getCollection('projects')).sort(byNewest)
+const featuredProjects = projects.filter((entry) => entry.data.featured).slice(0, 4)
+const skills = (await getCollection('skills')).sort(byNewest).slice(0, 3)
+const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
+---
+
+<BaseLayout>
+  <section class="hero" aria-labelledby="hero-title">
+    <div class="hero__veil" aria-hidden="true"></div>
+    <div class="hero__content shell">
+      <p class="hero__eyebrow">AI systems / desktop / agent skills</p>
+      <h1 id="hero-title">zp-home</h1>
+      <p class="hero__copy">把 AI 工具做成可运行的产品，把工程经验整理成可复用的能力。</p>
+      <div class="button-row">
+        <a class="button button--accent" href="/projects/">查看项目 <ArrowRight size={17} /></a>
+        <a class="button button--ghost" href={site.github} target="_blank" rel="noreferrer"><Github size={17} /> GitHub</a>
+      </div>
+      <ul class="hero__focus" aria-label="关注方向">
+        {site.focus.map((item) => <li>{item}</li>)}
+      </ul>
+    </div>
+  </section>
+
+  <section class="signal-band" aria-label="公开工作概览">
+    <div class="shell signal-grid">
+      <div><strong>30+</strong><span>公开仓库</span></div>
+      <div><strong>3</strong><span>持续内容轨道</span></div>
+      <div><strong>Public</strong><span>来源可检查</span></div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="shell">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Selected work</p>
+          <h2>从插件生态到桌面交付</h2>
+        </div>
+        <p>项目页区分个人项目与开源协作，记录目标、负责边界和关键工程取舍。</p>
+      </div>
+      <div class="project-grid">
+        {featuredProjects.map((project) => <ProjectCard project={project} eager />)}
+      </div>
+      <div class="section-link">
+        <a class="button" href="/projects/">全部项目 <ArrowRight size={17} /></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--ink">
+    <div class="shell">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Working system</p>
+          <h2>产品、能力、知识形成闭环</h2>
+        </div>
+        <p>项目暴露真实问题，Skill 固化解决流程，知识记录保留可以复查的判断依据。</p>
+      </div>
+      <div class="workstreams">
+        <article>
+          <Layers3 size={24} />
+          <p class="workstreams__index">01 / Build</p>
+          <h3>产品系统</h3>
+          <p>跨平台桌面、插件市场、远程通道和开发沙箱。</p>
+        </article>
+        <article>
+          <Wrench size={24} />
+          <p class="workstreams__index">02 / Package</p>
+          <h3>Agent Skills</h3>
+          <p>把调研、打包、发布和验证流程变成可复用能力。</p>
+        </article>
+        <article>
+          <BookOpen size={24} />
+          <p class="workstreams__index">03 / Explain</p>
+          <h3>知识产物</h3>
+          <p>记录设计取舍、失败路径、实验方法和可追溯证据。</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="shell">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Reusable capabilities</p>
+          <h2>Skills</h2>
+        </div>
+        <p>每项能力都有明确触发场景、执行边界和验证方式，不是单次任务的提示词副本。</p>
+      </div>
+      <div class="skill-grid">
+        {skills.map((skill) => (
+          <a class="skill-item" href={`/skills/${skill.id}/`}>
+            <PackageCheck size={22} />
+            <span class="skill-item__kind">{skill.data.kind}</span>
+            <h3>{skill.data.title}</h3>
+            <p>{skill.data.summary}</p>
+            <ArrowRight class="skill-item__arrow" size={18} />
+          </a>
+        ))}
+      </div>
+      <div class="section-link">
+        <a class="button" href="/skills/">Skills 库 <ArrowRight size={17} /></a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section section--line">
+    <div class="shell">
+      <div class="section-heading">
+        <div>
+          <p class="eyebrow">Knowledge log</p>
+          <h2>最近整理</h2>
+        </div>
+        <p>短文从实际项目出发，保留约束、替代方案和验证结果。</p>
+      </div>
+      <div class="content-list">
+        {knowledge.map((entry) => (
+          <article class="content-row">
+            <span class="content-row__meta">{formatDate(entry.data.date)} · {entry.data.readingTime}</span>
+            <div>
+              <h3><a href={`/knowledge/${entry.id}/`}>{entry.data.title}</a></h3>
+              <p>{entry.data.summary}</p>
+            </div>
+            <a class="icon-button" href={`/knowledge/${entry.id}/`} title="阅读" aria-label={`阅读 ${entry.data.title}`}><ArrowRight size={18} /></a>
+          </article>
+        ))}
+      </div>
+      <div class="section-link">
+        <a class="button" href="/knowledge/">全部知识条目 <ArrowRight size={17} /></a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .hero {
+    position: relative;
+    display: flex;
+    min-height: 650px;
+    align-items: end;
+    isolation: isolate;
+    background-color: #1a211d;
+    background-image: url('/images/project-desktop.webp');
+    background-position: center;
+    background-size: cover;
+    color: #fff;
+  }
+
+  .hero__veil {
+    position: absolute;
+    z-index: -1;
+    inset: 0;
+    background: rgb(7 10 8 / 64%);
+  }
+
+  .hero__content {
+    padding-block: 90px 54px;
+  }
+
+  .hero__eyebrow {
+    margin: 0 0 12px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 13px;
+    font-weight: 700;
+    text-transform: uppercase;
+  }
+
+  .hero h1 {
+    max-width: 900px;
+    margin: 0;
+    font-size: 84px;
+    font-weight: 780;
+    line-height: 0.98;
+    letter-spacing: 0;
+  }
+
+  .hero__copy {
+    max-width: 690px;
+    margin: 24px 0 30px;
+    color: #e2e7de;
+    font-size: 22px;
+    line-height: 1.5;
+  }
+
+  .hero__focus {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px 22px;
+    margin: 52px 0 0;
+    padding: 18px 0 0;
+    border-top: 1px solid rgb(255 255 255 / 38%);
+    list-style: none;
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 12px;
+  }
+
+  .hero__focus li::before {
+    content: '•';
+    margin-right: 8px;
+    color: var(--signal);
+  }
+
+  .signal-band {
+    border-bottom: 1px solid var(--line);
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .signal-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .signal-grid div {
+    display: flex;
+    min-height: 92px;
+    align-items: center;
+    gap: 14px;
+    padding: 20px 28px;
+    border-right: 1px solid rgb(24 32 0 / 24%);
+  }
+
+  .signal-grid div:first-child {
+    padding-left: 0;
+  }
+
+  .signal-grid div:last-child {
+    border-right: 0;
+  }
+
+  .signal-grid strong {
+    font-size: 28px;
+    line-height: 1;
+  }
+
+  .signal-grid span {
+    font-size: 13px;
+    font-weight: 650;
+  }
+
+  .section-link {
+    margin-top: 32px;
+  }
+
+  .workstreams {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    border-top: 1px solid #454b40;
+  }
+
+  .workstreams article {
+    min-height: 260px;
+    padding: 30px 30px 30px 0;
+    border-right: 1px solid #454b40;
+  }
+
+  .workstreams article + article {
+    padding-left: 30px;
+  }
+
+  .workstreams article:last-child {
+    border-right: 0;
+  }
+
+  .workstreams__index {
+    margin: 44px 0 8px;
+    color: var(--accent);
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 12px;
+  }
+
+  .workstreams h3 {
+    margin: 0 0 10px;
+    font-size: 26px;
+  }
+
+  .workstreams article > p:last-child {
+    margin: 0;
+    color: #b8beb1;
+  }
+
+  .skill-grid {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 1px;
+    border: 1px solid var(--line);
+    background: var(--line);
+  }
+
+  .skill-item {
+    position: relative;
+    display: block;
+    min-height: 290px;
+    padding: 26px;
+    background: var(--surface);
+  }
+
+  .skill-item:hover {
+    background: var(--surface-2);
+  }
+
+  .skill-item__kind {
+    display: block;
+    margin: 38px 0 8px;
+    color: var(--cyan);
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 12px;
+  }
+
+  .skill-item h3 {
+    margin: 0 0 12px;
+    font-size: 23px;
+    line-height: 1.25;
+  }
+
+  .skill-item p {
+    margin: 0;
+    color: var(--muted);
+  }
+
+  .skill-item__arrow {
+    position: absolute;
+    right: 24px;
+    bottom: 24px;
+  }
+
+  @media (max-width: 820px) {
+    .hero {
+      min-height: 560px;
+    }
+
+    .hero__content {
+      padding-block: 74px 38px;
+    }
+
+    .hero h1 {
+      font-size: 58px;
+    }
+
+    .hero__copy {
+      font-size: 19px;
+    }
+
+    .hero__focus {
+      margin-top: 36px;
+    }
+
+    .signal-grid,
+    .workstreams,
+    .skill-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .signal-grid div,
+    .signal-grid div:first-child {
+      min-height: 70px;
+      padding: 14px 0;
+      border-right: 0;
+      border-bottom: 1px solid rgb(24 32 0 / 24%);
+    }
+
+    .signal-grid div:last-child {
+      border-bottom: 0;
+    }
+
+    .workstreams article,
+    .workstreams article + article {
+      min-height: 0;
+      padding: 26px 0;
+      border-right: 0;
+      border-bottom: 1px solid #454b40;
+    }
+
+    .workstreams article:last-child {
+      border-bottom: 0;
+    }
+
+    .workstreams__index {
+      margin-top: 24px;
+    }
+
+    .skill-item {
+      min-height: 240px;
+    }
+  }
+
+  @media (max-width: 520px) {
+    .hero {
+      min-height: 540px;
+      background-position: 62% center;
+    }
+
+    .hero h1 {
+      font-size: 49px;
+    }
+
+    .hero__copy {
+      max-width: 330px;
+    }
+
+    .hero__focus {
+      gap: 8px 16px;
+    }
+  }
+</style>

@@ -1,0 +1,55 @@
+---
+import { getCollection, render, type CollectionEntry } from 'astro:content'
+import { ArrowLeft, ArrowUpRight, Github } from 'lucide-astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { formatDate } from '../../utils/content'
+
+export async function getStaticPaths() {
+  const skills = await getCollection('skills')
+  return skills.map((skill) => ({ params: { id: skill.id }, props: { skill } }))
+}
+
+interface Props {
+  skill: CollectionEntry<'skills'>
+}
+
+const { skill } = Astro.props
+const { Content } = await render(skill)
+---
+
+<BaseLayout title={`${skill.data.title} | Skills | zp-home`} description={skill.data.summary}>
+  <article class="article-shell">
+    <header class="article-header">
+      <a class="back-link" href="/skills/"><ArrowLeft size={16} /> Skills</a>
+      <p class="eyebrow">{skill.data.kind}</p>
+      <h1>{skill.data.title}</h1>
+      <p class="article-header__summary">{skill.data.summary}</p>
+      <div class="article-meta">
+        <span>{formatDate(skill.data.date)}</span>
+        <span>触发：{skill.data.triggers.join(' / ')}</span>
+      </div>
+      {skill.data.repository && (
+        <a class="button skill-repo" href={skill.data.repository} target="_blank" rel="noreferrer"><Github size={17} /> Repository <ArrowUpRight size={15} /></a>
+      )}
+    </header>
+    <div class="prose">
+      <Content />
+    </div>
+  </article>
+</BaseLayout>
+
+<style>
+  .back-link {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 48px;
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 650;
+  }
+
+  .skill-repo {
+    margin-top: 26px;
+  }
+</style>

@@ -1,0 +1,191 @@
+---
+import { Github, Menu, Moon, Sun, X } from 'lucide-astro'
+import { site } from '../data/site'
+
+const pathname = Astro.url.pathname
+const links = [
+  { href: '/projects/', label: 'Projects' },
+  { href: '/skills/', label: 'Skills' },
+  { href: '/knowledge/', label: 'Knowledge' },
+]
+---
+
+<header class="site-header">
+  <div class="site-header__inner shell">
+    <a class="brand" href="/" aria-label="zp-home 首页">
+      <span class="brand__mark">ZP</span>
+      <span>zp-home</span>
+    </a>
+
+    <nav class="desktop-nav" aria-label="主导航">
+      {links.map((link) => (
+        <a href={link.href} aria-current={pathname.startsWith(link.href) ? 'page' : undefined}>
+          {link.label}
+        </a>
+      ))}
+    </nav>
+
+    <div class="header-actions">
+      <a class="icon-button" href={site.github} target="_blank" rel="noreferrer" title="GitHub" aria-label="打开 GitHub">
+        <Github size={18} />
+      </a>
+      <button class="icon-button" id="theme-toggle" type="button" title="切换主题" aria-label="切换深浅主题">
+        <Sun class="theme-icon theme-icon--sun" size={18} />
+        <Moon class="theme-icon theme-icon--moon" size={18} />
+      </button>
+      <button class="icon-button mobile-menu-button" id="menu-toggle" type="button" title="菜单" aria-label="打开导航" aria-expanded="false" aria-controls="mobile-nav">
+        <Menu class="menu-icon menu-icon--open" size={20} />
+        <X class="menu-icon menu-icon--close" size={20} />
+      </button>
+    </div>
+  </div>
+
+  <nav class="mobile-nav" id="mobile-nav" aria-label="移动端导航" hidden>
+    {links.map((link) => (
+      <a href={link.href} aria-current={pathname.startsWith(link.href) ? 'page' : undefined}>
+        {link.label}
+      </a>
+    ))}
+  </nav>
+</header>
+
+<script is:inline>
+  (() => {
+    const root = document.documentElement
+    const stored = localStorage.getItem('theme')
+    const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+    root.dataset.theme = stored || preferred
+
+    document.querySelector('#theme-toggle')?.addEventListener('click', () => {
+      const next = root.dataset.theme === 'dark' ? 'light' : 'dark'
+      root.dataset.theme = next
+      localStorage.setItem('theme', next)
+    })
+
+    const button = document.querySelector('#menu-toggle')
+    const nav = document.querySelector('#mobile-nav')
+    button?.addEventListener('click', () => {
+      const expanded = button.getAttribute('aria-expanded') === 'true'
+      button.setAttribute('aria-expanded', String(!expanded))
+      button.setAttribute('aria-label', expanded ? '打开导航' : '关闭导航')
+      if (nav instanceof HTMLElement) nav.hidden = expanded
+    })
+  })()
+</script>
+
+<style>
+  .site-header {
+    position: sticky;
+    z-index: 50;
+    top: 0;
+    height: var(--header);
+    border-bottom: 1px solid var(--line);
+    background: color-mix(in srgb, var(--bg) 92%, transparent);
+    backdrop-filter: blur(18px);
+  }
+
+  .site-header__inner {
+    display: flex;
+    height: 100%;
+    align-items: center;
+    gap: 28px;
+  }
+
+  .brand {
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 14px;
+    font-weight: 700;
+  }
+
+  .brand__mark {
+    display: grid;
+    width: 34px;
+    height: 34px;
+    place-items: center;
+    border-radius: 5px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: 12px;
+  }
+
+  .desktop-nav {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    margin-left: auto;
+  }
+
+  .desktop-nav a {
+    color: var(--muted);
+    font-size: 14px;
+    font-weight: 620;
+  }
+
+  .desktop-nav a:hover,
+  .desktop-nav a[aria-current='page'] {
+    color: var(--ink);
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+  }
+
+  .mobile-menu-button,
+  .mobile-nav {
+    display: none;
+  }
+
+  .theme-icon--sun,
+  :global(:root[data-theme='dark']) .theme-icon--moon {
+    display: none;
+  }
+
+  :global(:root[data-theme='dark']) .theme-icon--sun {
+    display: block;
+  }
+
+  .menu-icon--close,
+  .mobile-menu-button[aria-expanded='true'] .menu-icon--open {
+    display: none;
+  }
+
+  .mobile-menu-button[aria-expanded='true'] .menu-icon--close {
+    display: block;
+  }
+
+  @media (max-width: 720px) {
+    .desktop-nav {
+      display: none;
+    }
+
+    .header-actions {
+      margin-left: auto;
+    }
+
+    .mobile-menu-button {
+      display: inline-grid;
+    }
+
+    .mobile-nav:not([hidden]) {
+      display: grid;
+      position: absolute;
+      top: var(--header);
+      right: 0;
+      left: 0;
+      padding: 10px 14px 18px;
+      border-bottom: 1px solid var(--line);
+      background: var(--bg);
+      box-shadow: var(--shadow);
+    }
+
+    .mobile-nav a {
+      padding: 13px 10px;
+      border-bottom: 1px solid var(--line);
+      font-weight: 650;
+    }
+  }
+</style>

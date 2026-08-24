@@ -1,0 +1,55 @@
+---
+import { getCollection } from 'astro:content'
+import ProjectCard from '../../components/ProjectCard.astro'
+import BaseLayout from '../../layouts/BaseLayout.astro'
+import { byNewest } from '../../utils/content'
+
+const projects = (await getCollection('projects')).sort(byNewest)
+---
+
+<BaseLayout title="Projects | zp-home" description="公开项目、开源协作和关键工程取舍。">
+  <header class="page-intro shell">
+    <p class="eyebrow">Projects</p>
+    <h1>从真实约束里做产品</h1>
+    <p class="page-intro__copy">个人项目与开源协作分别标注。这里记录负责边界、实现重点和仍然存在的限制。</p>
+  </header>
+
+  <section class="section--compact shell">
+    <div class="filter-bar" role="group" aria-label="项目筛选">
+      <button class="filter-button" type="button" data-filter="all" aria-pressed="true">全部</button>
+      <button class="filter-button" type="button" data-filter="desktop">桌面与插件</button>
+      <button class="filter-button" type="button" data-filter="agent">Agent 能力</button>
+      <button class="filter-button" type="button" data-filter="automation">自动化</button>
+    </div>
+    <div class="project-grid" id="project-grid">
+      {projects.map((project) => <ProjectCard project={project} />)}
+    </div>
+    <p class="empty-state" id="project-empty">当前筛选下没有项目。</p>
+  </section>
+</BaseLayout>
+
+<script>
+  const aliases: Record<string, string[]> = {
+    desktop: ['desktop', 'electron', 'plugin', 'typescript'],
+    agent: ['agent', 'skills', 'interoperability'],
+    automation: ['automation', 'pipeline', 'github actions', 'sandbox'],
+  }
+
+  const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')]
+  const cards = [...document.querySelectorAll<HTMLElement>('[data-tags]')]
+  const empty = document.querySelector<HTMLElement>('#project-empty')
+
+  for (const button of buttons) {
+    button.addEventListener('click', () => {
+      const filter = button.dataset.filter ?? 'all'
+      let visible = 0
+      for (const candidate of buttons) candidate.setAttribute('aria-pressed', String(candidate === button))
+      for (const card of cards) {
+        const matches = filter === 'all' || aliases[filter]?.some((tag) => card.dataset.tags?.includes(tag))
+        card.hidden = !matches
+        if (matches) visible += 1
+      }
+      if (empty) empty.style.display = visible === 0 ? 'block' : 'none'
+    })
+  }
+</script>
