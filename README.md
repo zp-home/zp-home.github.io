@@ -46,4 +46,4 @@ npm run build
 npm run deploy
 ```
 
-该命令会先执行完整检查和生产构建，再把 `dist/` 推送到 `gh-pages`。GitHub Pages 的发布来源应设为 **Deploy from a branch**，分支为 `gh-pages`，目录为 `/ (root)`。
+该命令会先执行完整检查和生产构建，再把 `dist/` 推送到 `gh-pages`，并添加 `.nojekyll` 以保留 Astro 的 `/_astro/` 资源目录。GitHub Pages 的发布来源应设为 **Deploy from a branch**，分支为 `gh-pages`，目录为 `/ (root)`。

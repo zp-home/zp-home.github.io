@@ -7,7 +7,7 @@
     "dev": "astro dev",
     "build": "astro check && astro build",
     "preview": "astro preview",
-    "deploy": "npm run build && gh-pages -d dist -b gh-pages -m \"deploy: publish site\""
+    "deploy": "npm run build && gh-pages -d dist -b gh-pages --nojekyll -m \"deploy: publish site\""
   },
   "dependencies": {
     "@astrojs/sitemap": "3.7.3",
