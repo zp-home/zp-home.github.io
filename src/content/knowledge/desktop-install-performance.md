@@ -5,6 +5,7 @@ date: 2026-08-24
 tags: [Electron, NSIS, Performance, Packaging]
 featured: true
 readingTime: 8 min
+reactionIssue: 2
 source: https://github.com/zp-home/deepseek-harness-desktop/tree/build/windows-latest-20260824
 ---
 

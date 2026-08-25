@@ -1,0 +1,182 @@
+---
+import { Download, GitFork, Star } from 'lucide-astro'
+import { getRepositoryStats, parseGitHubRepository } from '../utils/github'
+
+interface Props {
+  compact?: boolean
+  repository: string
+}
+
+const { compact = false, repository } = Astro.props
+const reference = parseGitHubRepository(repository)
+const stats = await getRepositoryStats(repository)
+const baseUrl = reference ? `https://github.com/${reference.owner}/${reference.name}` : repository
+---
+
+{stats && (
+  <div
+    class:list={['repository-metrics', { 'repository-metrics--compact': compact }]}
+    aria-label="GitHub 仓库数据"
+    data-repository-metrics={reference ? `${reference.owner}/${reference.name}` : undefined}
+  >
+    <a href={`${baseUrl}/stargazers`} target="_blank" rel="noreferrer" title="查看 GitHub Stars">
+      <Star size={compact ? 15 : 17} aria-hidden="true" />
+      <strong data-repository-stat="stars">{stats.stars}</strong>
+      <span>Star</span>
+    </a>
+    <a href={`${baseUrl}/forks`} target="_blank" rel="noreferrer" title="查看 GitHub Forks">
+      <GitFork size={compact ? 15 : 17} aria-hidden="true" />
+      <strong data-repository-stat="forks">{stats.forks}</strong>
+      <span>Fork</span>
+    </a>
+    {stats.downloads !== null && (
+      <a href={`${baseUrl}/releases`} target="_blank" rel="noreferrer" title="查看 Release 下载">
+        <Download size={compact ? 15 : 17} aria-hidden="true" />
+        <strong data-repository-stat="downloads">{stats.downloads}</strong>
+        <span>下载</span>
+      </a>
+    )}
+  </div>
+)}
+
+<script>
+  interface ClientRepositoryStats {
+    cachedAt: number
+    downloads: number | null
+    forks: number
+    stars: number
+  }
+
+  interface RepositoryResponse {
+    forks_count: number
+    stargazers_count: number
+  }
+
+  interface ReleaseResponse {
+    assets: Array<{ download_count: number }>
+  }
+
+  const requests = new Map<string, Promise<ClientRepositoryStats | null>>()
+  const groups = document.querySelectorAll<HTMLElement>('[data-repository-metrics]')
+
+  function readCachedStats(repository: string) {
+    try {
+      const cached = sessionStorage.getItem(`github-stats:${repository}`)
+      if (!cached) return null
+      const stats = JSON.parse(cached) as ClientRepositoryStats
+      return Date.now() - stats.cachedAt < 60 * 60 * 1000 ? stats : null
+    } catch {
+      return null
+    }
+  }
+
+  function fetchStats(repository: string) {
+    const cached = readCachedStats(repository)
+    if (cached) return Promise.resolve(cached)
+
+    const active = requests.get(repository)
+    if (active) return active
+
+    const headers = { Accept: 'application/vnd.github+json' }
+    const request = Promise.all([
+      fetch(`https://api.github.com/repos/${repository}`, { headers }),
+      fetch(`https://api.github.com/repos/${repository}/releases?per_page=100`, { headers }),
+    ])
+      .then(async ([repositoryResponse, releasesResponse]) => {
+        if (!repositoryResponse.ok) return null
+        const repositoryData = (await repositoryResponse.json()) as RepositoryResponse
+        let downloads: number | null = null
+
+        if (releasesResponse.ok) {
+          const releases = (await releasesResponse.json()) as ReleaseResponse[]
+          downloads = releases.reduce(
+            (total, release) => total + release.assets.reduce((sum, asset) => sum + asset.download_count, 0),
+            0,
+          )
+        }
+
+        const stats: ClientRepositoryStats = {
+          cachedAt: Date.now(),
+          downloads,
+          forks: repositoryData.forks_count,
+          stars: repositoryData.stargazers_count,
+        }
+
+        try {
+          sessionStorage.setItem(`github-stats:${repository}`, JSON.stringify(stats))
+        } catch {}
+        return stats
+      })
+      .catch(() => null)
+
+    requests.set(repository, request)
+    return request
+  }
+
+  for (const group of groups) {
+    const repository = group.dataset.repositoryMetrics
+    if (!repository) continue
+
+    fetchStats(repository).then((stats) => {
+      if (!stats) return
+      for (const key of ['stars', 'forks', 'downloads'] as const) {
+        const value = stats[key]
+        const target = group.querySelector<HTMLElement>(`[data-repository-stat="${key}"]`)
+        if (value !== null && target) target.textContent = String(value)
+      }
+    })
+  }
+</script>
+
+<style>
+  .repository-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    margin-top: 24px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 13px;
+  }
+
+  .repository-metrics a {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .repository-metrics a:hover {
+    color: var(--cyan);
+  }
+
+  .repository-metrics strong {
+    color: var(--ink);
+    font-size: 15px;
+  }
+
+  .repository-metrics--compact {
+    gap: 14px;
+    margin-top: 20px;
+    font-size: 12px;
+  }
+
+  .repository-metrics--compact a {
+    min-height: 26px;
+  }
+
+  .repository-metrics--compact strong {
+    font-size: 13px;
+  }
+
+  @media (max-width: 390px) {
+    .repository-metrics {
+      gap: 12px;
+    }
+
+    .repository-metrics a {
+      gap: 5px;
+    }
+  }
+</style>

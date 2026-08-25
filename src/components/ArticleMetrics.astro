@@ -1,0 +1,95 @@
+---
+import { Eye, ThumbsUp } from 'lucide-astro'
+import { getArticleLikes } from '../utils/github'
+
+interface Props {
+  issueNumber: number
+}
+
+const { issueNumber } = Astro.props
+const likes = (await getArticleLikes(issueNumber)) ?? 0
+const issueUrl = `https://github.com/zp-home/zp-home.github.io/issues/${issueNumber}`
+---
+
+<div class="article-metrics" aria-label="文章数据">
+  <span class="article-metric" title="本页累计访问量">
+    <Eye size={17} aria-hidden="true" />
+    <strong id="vercount_value_page_pv">--</strong>
+    <span>阅读</span>
+  </span>
+  <a
+    class="article-metric article-metric--action"
+    href={issueUrl}
+    target="_blank"
+    rel="noreferrer"
+    title="前往 GitHub 为本文点赞"
+    data-like-issue={issueNumber}
+  >
+    <ThumbsUp size={17} aria-hidden="true" />
+    <strong data-like-count>{likes}</strong>
+    <span>点赞</span>
+  </a>
+</div>
+
+<script>
+  const metrics = document.querySelectorAll<HTMLElement>('[data-like-issue]')
+
+  for (const metric of metrics) {
+    const issueNumber = metric.dataset.likeIssue
+    const count = metric.querySelector<HTMLElement>('[data-like-count]')
+    if (!issueNumber || !count) continue
+
+    fetch(`https://api.github.com/repos/zp-home/zp-home.github.io/issues/${issueNumber}`, {
+      headers: { Accept: 'application/vnd.github+json' },
+    })
+      .then((response) => (response.ok ? response.json() : Promise.reject()))
+      .then((issue: { reactions?: { '+1'?: number } }) => {
+        count.textContent = String(issue.reactions?.['+1'] ?? 0)
+      })
+      .catch(() => {})
+  }
+</script>
+
+<style>
+  .article-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0;
+    margin-top: 26px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 13px;
+  }
+
+  .article-metric {
+    display: inline-flex;
+    min-height: 38px;
+    align-items: center;
+    gap: 7px;
+    padding-inline: 14px;
+    border-left: 1px solid var(--line);
+  }
+
+  .article-metric:first-child {
+    padding-left: 0;
+    border-left: 0;
+  }
+
+  .article-metric strong {
+    min-width: 1ch;
+    color: var(--ink);
+    font-size: 15px;
+  }
+
+  .article-metric--action {
+    color: var(--cyan);
+    font-weight: 650;
+  }
+
+  .article-metric--action:hover strong,
+  .article-metric--action:hover span {
+    text-decoration: underline;
+    text-underline-offset: 3px;
+  }
+</style>

@@ -31,6 +31,14 @@ npm run build
 
 新建同类 Markdown 文件并填写 frontmatter 即可增加内容。字段约束集中在 `src/content.config.ts`，构建时会校验。项目图片放入 `public/images/`。
 
+## 公开统计
+
+- 文章访问量由 Vercount 按页面路径累计。
+- 文章的 `reactionIssue` 对应本站仓库中的专用 Issue，页面读取该 Issue 的 👍 reaction 数作为点赞量。
+- 项目与 Skill 的 Star、Fork 和 Release 资源下载量在构建时从 GitHub 公共 API 获取，页面加载后再按小时缓存刷新。
+
+新增知识文章时，先创建带 `article-reactions` 标签的专用 Issue，再把 Issue 编号写入文章 frontmatter 的 `reactionIssue` 字段。
+
 ## 公开内容边界
 
 - 只使用已公开的仓库、图片和技术信息。

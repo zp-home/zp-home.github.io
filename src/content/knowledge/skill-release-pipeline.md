@@ -5,6 +5,7 @@ date: 2026-08-12
 tags: [Agent Skills, Release, Security, Metadata]
 featured: true
 readingTime: 6 min
+reactionIssue: 3
 source: https://github.com/zp-home/skillhub-publish-optimizer
 ---
 

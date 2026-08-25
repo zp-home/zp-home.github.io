@@ -1,6 +1,7 @@
 ---
 import { ArrowUpRight, Github } from 'lucide-astro'
 import type { CollectionEntry } from 'astro:content'
+import RepositoryMetrics from './RepositoryMetrics.astro'
 
 interface Props {
   project: CollectionEntry<'projects'>
@@ -31,6 +32,7 @@ const { project, eager = false } = Astro.props
     <ul class="tag-list" aria-label="技术标签">
       {project.data.tags.slice(0, 4).map((tag) => <li class="tag">{tag}</li>)}
     </ul>
+    <RepositoryMetrics repository={project.data.repository} compact />
     <div class="project-card__actions">
       <a href={`/projects/${project.id}/`}>项目记录 <ArrowUpRight size={16} /></a>
       <a href={project.data.repository} target="_blank" rel="noreferrer" title="GitHub" aria-label={`${project.data.title} GitHub 仓库`}>

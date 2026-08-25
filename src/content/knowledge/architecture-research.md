@@ -5,6 +5,7 @@ date: 2026-08-12
 tags: [Architecture, Open Source, Research, ADR]
 featured: false
 readingTime: 7 min
+reactionIssue: 1
 source: https://github.com/zp-home/architecture-open-source-research
 ---
 

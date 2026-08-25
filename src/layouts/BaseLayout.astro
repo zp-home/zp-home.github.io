@@ -45,6 +45,7 @@ const socialImage = new URL(image, Astro.site)
         document.documentElement.dataset.theme = stored || preferred
       })()
     </script>
+    <script is:inline defer src="https://events.vercount.one/js"></script>
     <title>{title}</title>
   </head>
   <body>

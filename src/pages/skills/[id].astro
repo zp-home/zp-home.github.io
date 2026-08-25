@@ -1,6 +1,7 @@
 ---
 import { getCollection, render, type CollectionEntry } from 'astro:content'
 import { ArrowLeft, ArrowUpRight, Github } from 'lucide-astro'
+import RepositoryMetrics from '../../components/RepositoryMetrics.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { formatDate } from '../../utils/content'
 
@@ -29,7 +30,10 @@ const { Content } = await render(skill)
         <span>触发：{skill.data.triggers.join(' / ')}</span>
       </div>
       {skill.data.repository && (
-        <a class="button skill-repo" href={skill.data.repository} target="_blank" rel="noreferrer"><Github size={17} /> Repository <ArrowUpRight size={15} /></a>
+        <>
+          <a class="button skill-repo" href={skill.data.repository} target="_blank" rel="noreferrer"><Github size={17} /> Repository <ArrowUpRight size={15} /></a>
+          <RepositoryMetrics repository={skill.data.repository} />
+        </>
       )}
     </header>
     <div class="prose">

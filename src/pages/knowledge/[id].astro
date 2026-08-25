@@ -1,6 +1,7 @@
 ---
 import { getCollection, render, type CollectionEntry } from 'astro:content'
 import { ArrowLeft, ArrowUpRight } from 'lucide-astro'
+import ArticleMetrics from '../../components/ArticleMetrics.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { formatDate } from '../../utils/content'
 
@@ -29,6 +30,7 @@ const { Content } = await render(entry)
         <span>{entry.data.readingTime}</span>
         <span>{entry.data.tags.join(' / ')}</span>
       </div>
+      <ArticleMetrics issueNumber={entry.data.reactionIssue} />
       {entry.data.source && (
         <a class="source-link" href={entry.data.source} target="_blank" rel="noreferrer">查看公开来源 <ArrowUpRight size={15} /></a>
       )}

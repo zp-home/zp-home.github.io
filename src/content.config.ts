@@ -34,6 +34,7 @@ const knowledge = defineCollection({
   loader: glob({ pattern: '**/*.md', base: './src/content/knowledge' }),
   schema: common.extend({
     readingTime: z.string(),
+    reactionIssue: z.number().int().positive(),
     source: z.url().optional(),
   }),
 })

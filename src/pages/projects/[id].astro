@@ -1,6 +1,7 @@
 ---
 import { getCollection, render, type CollectionEntry } from 'astro:content'
 import { ArrowLeft, ArrowUpRight, Github } from 'lucide-astro'
+import RepositoryMetrics from '../../components/RepositoryMetrics.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { formatDate } from '../../utils/content'
 
@@ -31,6 +32,7 @@ const { Content } = await render(project)
             <a class="button" href={project.data.website} target="_blank" rel="noreferrer">Live site <ArrowUpRight size={17} /></a>
           )}
         </div>
+        <RepositoryMetrics repository={project.data.repository} />
         <div class="article-meta">
           <span>{formatDate(project.data.date)}</span>
           <span>{project.data.tags.join(' / ')}</span>
