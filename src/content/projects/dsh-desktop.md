@@ -7,7 +7,7 @@ featured: true
 role: 开源协作 / Fork
 status: 已验证初版
 image: /images/project-desktop.webp
-repository: https://github.com/zp-home/deepseek-harness-desktop
+repository: https://github.com/anywhere-labs/dsh-desktop
 website: https://dshdesktop.cn
 ---
 
