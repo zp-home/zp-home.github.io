@@ -7,7 +7,7 @@ featured: true
 role: 开源协作 / Fork
 status: 活跃项目
 image: /images/project-market.webp
-repository: https://github.com/zp-home/dsh-market
+repository: https://github.com/dsh-market/dsh-market
 website: https://dshmarket.com
 ---
 
