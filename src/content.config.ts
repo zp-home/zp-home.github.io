@@ -26,6 +26,13 @@ const skills = defineCollection({
   schema: common.extend({
     kind: z.string(),
     repository: z.url().optional(),
+    skillhub: z.object({
+      url: z.url(),
+      version: z.string(),
+      downloads: z.number().int().nonnegative(),
+      stars: z.number().int().nonnegative(),
+      installs: z.number().int().nonnegative(),
+    }).optional(),
     triggers: z.array(z.string()),
   }),
 })

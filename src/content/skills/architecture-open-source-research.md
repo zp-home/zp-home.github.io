@@ -6,6 +6,12 @@ tags: [Architecture, Research, Open Source, Decision Records]
 featured: true
 kind: Research Skill
 repository: https://github.com/zp-home/architecture-open-source-research
+skillhub:
+  url: https://skillhub.cn/skills/architecture-open-source-research
+  version: 1.1.3
+  downloads: 46
+  stars: 0
+  installs: 0
 triggers: [架构设计, 技术选型, 开源调研]
 ---
 

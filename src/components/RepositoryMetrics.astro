@@ -1,6 +1,6 @@
 ---
 import { Download, GitFork, Star } from 'lucide-astro'
-import { getRepositoryStats, parseGitHubRepository } from '../utils/github'
+import { getRepositoryStats, parseRepository } from '../utils/github'
 
 interface Props {
   compact?: boolean
@@ -8,23 +8,25 @@ interface Props {
 }
 
 const { compact = false, repository } = Astro.props
-const reference = parseGitHubRepository(repository)
+const reference = parseRepository(repository)
 const stats = await getRepositoryStats(repository)
-const baseUrl = reference ? `https://github.com/${reference.owner}/${reference.name}` : repository
+const baseUrl = reference?.baseUrl ?? repository
+const providerLabel = reference?.provider === 'gitee' ? 'Gitee' : 'GitHub'
 ---
 
 {stats && (
   <div
     class:list={['repository-metrics', { 'repository-metrics--compact': compact }]}
-    aria-label="GitHub 仓库数据"
+    aria-label={`${providerLabel} 仓库数据`}
     data-repository-metrics={reference ? `${reference.owner}/${reference.name}` : undefined}
+    data-repository-provider={reference?.provider}
   >
-    <a href={`${baseUrl}/stargazers`} target="_blank" rel="noreferrer" title="查看 GitHub Stars">
+    <a href={`${baseUrl}/stargazers`} target="_blank" rel="noreferrer" title={`查看 ${providerLabel} Stars`}>
       <Star size={compact ? 15 : 17} aria-hidden="true" />
       <strong data-repository-stat="stars">{stats.stars}</strong>
       <span>Star</span>
     </a>
-    <a href={`${baseUrl}/forks`} target="_blank" rel="noreferrer" title="查看 GitHub Forks">
+    <a href={`${baseUrl}/forks`} target="_blank" rel="noreferrer" title={`查看 ${providerLabel} Forks`}>
       <GitFork size={compact ? 15 : 17} aria-hidden="true" />
       <strong data-repository-stat="forks">{stats.forks}</strong>
       <span>Fork</span>
@@ -59,9 +61,9 @@ const baseUrl = reference ? `https://github.com/${reference.owner}/${reference.n
   const requests = new Map<string, Promise<ClientRepositoryStats | null>>()
   const groups = document.querySelectorAll<HTMLElement>('[data-repository-metrics]')
 
-  function readCachedStats(repository: string) {
+  function readCachedStats(provider: string, repository: string) {
     try {
-      const cached = sessionStorage.getItem(`github-stats:${repository}`)
+      const cached = sessionStorage.getItem(`repository-stats:${provider}:${repository}`)
       if (!cached) return null
       const stats = JSON.parse(cached) as ClientRepositoryStats
       return Date.now() - stats.cachedAt < 60 * 60 * 1000 ? stats : null
@@ -70,24 +72,28 @@ const baseUrl = reference ? `https://github.com/${reference.owner}/${reference.n
     }
   }
 
-  function fetchStats(repository: string) {
-    const cached = readCachedStats(repository)
+  function fetchStats(provider: string, repository: string) {
+    const key = `${provider}:${repository}`
+    const cached = readCachedStats(provider, repository)
     if (cached) return Promise.resolve(cached)
 
-    const active = requests.get(repository)
+    const active = requests.get(key)
     if (active) return active
 
-    const headers = { Accept: 'application/vnd.github+json' }
-    const request = Promise.all([
-      fetch(`https://api.github.com/repos/${repository}`, { headers }),
-      fetch(`https://api.github.com/repos/${repository}/releases?per_page=100`, { headers }),
-    ])
+    const apiBase = provider === 'gitee' ? 'https://gitee.com/api/v5/repos' : 'https://api.github.com/repos'
+    const headers = { Accept: provider === 'gitee' ? 'application/json' : 'application/vnd.github+json' }
+    const repositoryRequest = fetch(`${apiBase}/${repository}`, { headers })
+    const releasesRequest = provider === 'github'
+      ? fetch(`https://api.github.com/repos/${repository}/releases?per_page=100`, { headers })
+      : Promise.resolve(null)
+
+    const request = Promise.all([repositoryRequest, releasesRequest])
       .then(async ([repositoryResponse, releasesResponse]) => {
         if (!repositoryResponse.ok) return null
         const repositoryData = (await repositoryResponse.json()) as RepositoryResponse
         let downloads: number | null = null
 
-        if (releasesResponse.ok) {
+        if (releasesResponse?.ok) {
           const releases = (await releasesResponse.json()) as ReleaseResponse[]
           downloads = releases.reduce(
             (total, release) => total + release.assets.reduce((sum, asset) => sum + asset.download_count, 0),
@@ -103,21 +109,22 @@ const baseUrl = reference ? `https://github.com/${reference.owner}/${reference.n
         }
 
         try {
-          sessionStorage.setItem(`github-stats:${repository}`, JSON.stringify(stats))
+          sessionStorage.setItem(`repository-stats:${provider}:${repository}`, JSON.stringify(stats))
         } catch {}
         return stats
       })
       .catch(() => null)
 
-    requests.set(repository, request)
+    requests.set(key, request)
     return request
   }
 
   for (const group of groups) {
     const repository = group.dataset.repositoryMetrics
-    if (!repository) continue
+    const provider = group.dataset.repositoryProvider
+    if (!repository || !provider) continue
 
-    fetchStats(repository).then((stats) => {
+    fetchStats(provider, repository).then((stats) => {
       if (!stats) return
       for (const key of ['stars', 'forks', 'downloads'] as const) {
         const value = stats[key]

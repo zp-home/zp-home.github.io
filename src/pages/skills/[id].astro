@@ -1,7 +1,8 @@
 ---
 import { getCollection, render, type CollectionEntry } from 'astro:content'
-import { ArrowLeft, ArrowUpRight, Github } from 'lucide-astro'
+import { ArrowLeft, ArrowUpRight, Blocks, Github } from 'lucide-astro'
 import RepositoryMetrics from '../../components/RepositoryMetrics.astro'
+import SkillHubMetrics from '../../components/SkillHubMetrics.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { formatDate } from '../../utils/content'
 
@@ -29,12 +30,16 @@ const { Content } = await render(skill)
         <span>{formatDate(skill.data.date)}</span>
         <span>触发：{skill.data.triggers.join(' / ')}</span>
       </div>
-      {skill.data.repository && (
-        <>
-          <a class="button skill-repo" href={skill.data.repository} target="_blank" rel="noreferrer"><Github size={17} /> Repository <ArrowUpRight size={15} /></a>
-          <RepositoryMetrics repository={skill.data.repository} />
-        </>
-      )}
+      <div class="button-row skill-links">
+        {skill.data.skillhub && (
+          <a class="button button--accent" href={skill.data.skillhub.url} target="_blank" rel="noreferrer"><Blocks size={17} /> SkillHub <ArrowUpRight size={15} /></a>
+        )}
+        {skill.data.repository && (
+          <a class="button" href={skill.data.repository} target="_blank" rel="noreferrer"><Github size={17} /> GitHub <ArrowUpRight size={15} /></a>
+        )}
+      </div>
+      {skill.data.skillhub && <SkillHubMetrics skillhub={skill.data.skillhub} />}
+      {skill.data.repository && <RepositoryMetrics repository={skill.data.repository} />}
     </header>
     <div class="prose">
       <Content />
@@ -53,7 +58,7 @@ const { Content } = await render(skill)
     font-weight: 650;
   }
 
-  .skill-repo {
+  .skill-links {
     margin-top: 26px;
   }
 </style>

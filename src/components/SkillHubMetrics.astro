@@ -1,0 +1,94 @@
+---
+import { Download, PackageCheck, Star, Tag } from 'lucide-astro'
+import { getSkillHubStats, type SkillHubStats } from '../utils/skillhub'
+
+interface Props {
+  compact?: boolean
+  skillhub: SkillHubStats & { url: string }
+}
+
+const { compact = false, skillhub } = Astro.props
+const stats = (await getSkillHubStats(skillhub.url)) ?? skillhub
+---
+
+<div
+  class:list={['skillhub-metrics', { 'skillhub-metrics--compact': compact }]}
+  aria-label="SkillHub 公开数据"
+  title="数据在每次站点构建时从 SkillHub 公开接口更新"
+>
+  <a href={skillhub.url} target="_blank" rel="noreferrer" title="在 SkillHub 查看公开版本">
+    <Tag size={compact ? 15 : 17} aria-hidden="true" />
+    <strong>v{stats.version}</strong>
+    <span>版本</span>
+  </a>
+  <a href={skillhub.url} target="_blank" rel="noreferrer" title="在 SkillHub 查看下载量">
+    <Download size={compact ? 15 : 17} aria-hidden="true" />
+    <strong>{stats.downloads}</strong>
+    <span>下载</span>
+  </a>
+  <a href={skillhub.url} target="_blank" rel="noreferrer" title="在 SkillHub 查看 Stars">
+    <Star size={compact ? 15 : 17} aria-hidden="true" />
+    <strong>{stats.stars}</strong>
+    <span>Star</span>
+  </a>
+  {!compact && (
+    <a href={skillhub.url} target="_blank" rel="noreferrer" title="在 SkillHub 查看安装量">
+      <PackageCheck size={17} aria-hidden="true" />
+      <strong>{stats.installs}</strong>
+      <span>安装</span>
+    </a>
+  )}
+</div>
+
+<style>
+  .skillhub-metrics {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 18px;
+    margin-top: 24px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 13px;
+  }
+
+  .skillhub-metrics a {
+    display: inline-flex;
+    min-height: 32px;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .skillhub-metrics a:hover {
+    color: var(--cyan);
+  }
+
+  .skillhub-metrics strong {
+    color: var(--ink);
+    font-size: 15px;
+  }
+
+  .skillhub-metrics--compact {
+    gap: 14px;
+    margin-top: 18px;
+    font-size: 12px;
+  }
+
+  .skillhub-metrics--compact a {
+    min-height: 26px;
+  }
+
+  .skillhub-metrics--compact strong {
+    font-size: 13px;
+  }
+
+  @media (max-width: 390px) {
+    .skillhub-metrics {
+      gap: 12px;
+    }
+
+    .skillhub-metrics a {
+      gap: 5px;
+    }
+  }
+</style>

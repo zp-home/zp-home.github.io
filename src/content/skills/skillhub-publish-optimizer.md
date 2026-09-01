@@ -6,6 +6,12 @@ tags: [Agent Skills, Release, Validation, Automation]
 featured: true
 kind: Release Skill
 repository: https://github.com/zp-home/skillhub-publish-optimizer
+skillhub:
+  url: https://skillhub.cn/skills/skillhub-publish-optimizer
+  version: 1.1.1
+  downloads: 66
+  stars: 1
+  installs: 0
 triggers: [Skill 打包, 发布审计, SkillHub 上架]
 ---
 

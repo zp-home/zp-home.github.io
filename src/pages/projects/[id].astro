@@ -1,9 +1,10 @@
 ---
 import { getCollection, render, type CollectionEntry } from 'astro:content'
-import { ArrowLeft, ArrowUpRight, Github } from 'lucide-astro'
+import { ArrowLeft, ArrowUpRight, GitBranch, Github } from 'lucide-astro'
 import RepositoryMetrics from '../../components/RepositoryMetrics.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { formatDate } from '../../utils/content'
+import { parseRepository } from '../../utils/github'
 
 export async function getStaticPaths() {
   const projects = await getCollection('projects')
@@ -16,6 +17,8 @@ interface Props {
 
 const { project } = Astro.props
 const { Content } = await render(project)
+const repository = parseRepository(project.data.repository)
+const repositoryLabel = repository?.provider === 'gitee' ? 'Gitee' : 'GitHub'
 ---
 
 <BaseLayout title={`${project.data.title} | zp-home`} description={project.data.summary} image={project.data.image}>
@@ -27,7 +30,10 @@ const { Content } = await render(project)
         <h1>{project.data.title}</h1>
         <p class="project-header__summary">{project.data.summary}</p>
         <div class="button-row">
-          <a class="button button--accent" href={project.data.repository} target="_blank" rel="noreferrer"><Github size={17} /> Repository</a>
+          <a class="button button--accent" href={project.data.repository} target="_blank" rel="noreferrer">
+            {repository?.provider === 'gitee' ? <GitBranch size={17} /> : <Github size={17} />}
+            {repositoryLabel}
+          </a>
           {project.data.website && (
             <a class="button" href={project.data.website} target="_blank" rel="noreferrer">Live site <ArrowUpRight size={17} /></a>
           )}

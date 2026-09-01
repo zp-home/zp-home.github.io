@@ -18,7 +18,7 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
     <div class="hero__content shell">
       <p class="hero__eyebrow">AI systems / desktop / agent skills</p>
       <h1 id="hero-title">zp-home</h1>
-      <p class="hero__copy">把 AI 工具做成可运行的产品，把工程经验整理成可复用的能力。</p>
+      <p class="hero__copy">不只展示做出了什么，也记录问题如何复现、根因怎样定位、方案为什么取舍，以及哪些验证仍然没有完成。</p>
       <div class="button-row">
         <a class="button button--accent" href="/projects/">查看项目 <ArrowRight size={17} /></a>
         <a class="button button--ghost" href={site.github} target="_blank" rel="noreferrer"><Github size={17} /> GitHub</a>
@@ -32,7 +32,7 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
   <section class="signal-band" aria-label="公开工作概览">
     <div class="shell signal-grid">
       <div><strong>30+</strong><span>公开仓库</span></div>
-      <div><strong>3</strong><span>持续内容轨道</span></div>
+      <div><strong>6</strong><span>SkillHub 已发布 Skills</span></div>
       <div><strong>Public</strong><span>来源可检查</span></div>
     </div>
   </section>
@@ -44,7 +44,7 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
           <p class="eyebrow">Selected work</p>
           <h2>从插件生态到桌面交付</h2>
         </div>
-        <p>项目页区分个人项目与开源协作，记录目标、负责边界和关键工程取舍。</p>
+        <p>项目页区分个人项目与开源协作，用 Issue、PR、测试与失败记录还原真实开发过程。</p>
       </div>
       <div class="project-grid">
         {featuredProjects.map((project) => <ProjectCard project={project} eager />)}

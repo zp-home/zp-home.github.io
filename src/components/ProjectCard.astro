@@ -1,7 +1,8 @@
 ---
-import { ArrowUpRight, Github } from 'lucide-astro'
+import { ArrowUpRight, GitBranch, Github } from 'lucide-astro'
 import type { CollectionEntry } from 'astro:content'
 import RepositoryMetrics from './RepositoryMetrics.astro'
+import { parseRepository } from '../utils/github'
 
 interface Props {
   project: CollectionEntry<'projects'>
@@ -9,6 +10,8 @@ interface Props {
 }
 
 const { project, eager = false } = Astro.props
+const repository = parseRepository(project.data.repository)
+const repositoryLabel = repository?.provider === 'gitee' ? 'Gitee' : 'GitHub'
 ---
 
 <article class="project-card" data-tags={project.data.tags.join(' ').toLowerCase()}>
@@ -35,8 +38,8 @@ const { project, eager = false } = Astro.props
     <RepositoryMetrics repository={project.data.repository} compact />
     <div class="project-card__actions">
       <a href={`/projects/${project.id}/`}>项目记录 <ArrowUpRight size={16} /></a>
-      <a href={project.data.repository} target="_blank" rel="noreferrer" title="GitHub" aria-label={`${project.data.title} GitHub 仓库`}>
-        <Github size={18} />
+      <a href={project.data.repository} target="_blank" rel="noreferrer" title={repositoryLabel} aria-label={`${project.data.title} ${repositoryLabel} 仓库`}>
+        {repository?.provider === 'gitee' ? <GitBranch size={18} /> : <Github size={18} />}
       </a>
     </div>
   </div>

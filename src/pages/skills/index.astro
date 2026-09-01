@@ -1,6 +1,7 @@
 ---
 import { getCollection } from 'astro:content'
-import { ArrowRight, Github } from 'lucide-astro'
+import { ArrowRight, Blocks, Github } from 'lucide-astro'
+import SkillHubMetrics from '../../components/SkillHubMetrics.astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { byNewest } from '../../utils/content'
 
@@ -28,8 +29,12 @@ const skills = (await getCollection('skills')).sort(byNewest)
             <ul class="tag-list skill-tags">
               {skill.data.tags.map((tag) => <li class="tag">{tag}</li>)}
             </ul>
+            {skill.data.skillhub && <SkillHubMetrics skillhub={skill.data.skillhub} compact />}
           </div>
           <div class="row-actions">
+            {skill.data.skillhub && (
+              <a class="icon-button" href={skill.data.skillhub.url} target="_blank" rel="noreferrer" title="SkillHub" aria-label={`${skill.data.title} SkillHub`}><Blocks size={18} /></a>
+            )}
             {skill.data.repository && (
               <a class="icon-button" href={skill.data.repository} target="_blank" rel="noreferrer" title="GitHub" aria-label={`${skill.data.title} GitHub`}><Github size={18} /></a>
             )}
@@ -48,6 +53,7 @@ const skills = (await getCollection('skills')).sort(byNewest)
 
   .row-actions {
     display: flex;
+    flex-wrap: wrap;
     gap: 8px;
   }
 </style>

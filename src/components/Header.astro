@@ -1,5 +1,5 @@
 ---
-import { Github, Menu, Moon, Sun, X } from 'lucide-astro'
+import { Blocks, GitBranch, Github, Menu, Moon, Sun, X } from 'lucide-astro'
 import { site } from '../data/site'
 
 const pathname = Astro.url.pathname
@@ -26,6 +26,12 @@ const links = [
     </nav>
 
     <div class="header-actions">
+      <a class="icon-button identity-action" href={site.skillhub} target="_blank" rel="noreferrer" title={`SkillHub ${site.skillhubHandle}`} aria-label={`打开 SkillHub ${site.skillhubHandle}`}>
+        <Blocks size={18} />
+      </a>
+      <a class="icon-button identity-action" href={site.gitee} target="_blank" rel="noreferrer" title="Gitee yr_binary" aria-label="打开 Gitee yr_binary">
+        <GitBranch size={18} />
+      </a>
       <a class="icon-button" href={site.github} target="_blank" rel="noreferrer" title="GitHub" aria-label="打开 GitHub">
         <Github size={18} />
       </a>
@@ -158,6 +164,10 @@ const links = [
   }
 
   @media (max-width: 720px) {
+    .identity-action {
+      display: none;
+    }
+
     .desktop-nav {
       display: none;
     }

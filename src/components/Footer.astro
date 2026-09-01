@@ -1,5 +1,5 @@
 ---
-import { ArrowUpRight, Github } from 'lucide-astro'
+import { ArrowUpRight, Blocks, GitBranch, Github } from 'lucide-astro'
 import { site } from '../data/site'
 ---
 
@@ -12,6 +12,12 @@ import { site } from '../data/site'
     <div class="footer-links">
       <a href={site.github} target="_blank" rel="noreferrer">
         <Github size={17} /> GitHub <ArrowUpRight size={15} />
+      </a>
+      <a href={site.gitee} target="_blank" rel="noreferrer">
+        <GitBranch size={17} /> Gitee yr_binary <ArrowUpRight size={15} />
+      </a>
+      <a href={site.skillhub} target="_blank" rel="noreferrer">
+        <Blocks size={17} /> SkillHub {site.skillhubHandle} <ArrowUpRight size={15} />
       </a>
       <a href="/knowledge/">Knowledge</a>
       <a href="/skills/">Skills</a>
