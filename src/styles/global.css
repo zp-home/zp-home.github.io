@@ -1,36 +1,43 @@
-@import '@fontsource-variable/inter';
+@import '@fontsource-variable/dm-sans';
 @import '@fontsource-variable/jetbrains-mono';
 
 :root {
   color-scheme: light;
-  --bg: #f4f5ef;
-  --surface: #ffffff;
-  --surface-2: #e8ebe2;
-  --ink: #141612;
-  --muted: #5f665b;
-  --line: #cdd2c7;
-  --accent: #d7ff45;
-  --accent-ink: #182000;
-  --signal: #ff6847;
-  --cyan: #2b8f87;
-  --shadow: 0 16px 40px rgb(20 22 18 / 10%);
-  --content: 1180px;
-  --header: 64px;
+  --bg: oklch(97.2% 0.01 108);
+  --surface: oklch(99.4% 0.004 108);
+  --surface-2: oklch(93.8% 0.018 112);
+  --ink: oklch(20% 0.018 118);
+  --muted: oklch(47% 0.028 120);
+  --line: oklch(84% 0.024 112);
+  --accent: oklch(92% 0.235 120);
+  --accent-hover: oklch(87% 0.225 120);
+  --accent-ink: oklch(21% 0.055 120);
+  --signal: oklch(68% 0.205 35);
+  --cyan: oklch(56% 0.105 188);
+  --focus: oklch(62% 0.18 225);
+  --shadow: 0 16px 40px oklch(20% 0.018 118 / 10%);
+  --shadow-strong: 0 24px 64px oklch(20% 0.018 118 / 16%);
+  --content: 1240px;
+  --header: 72px;
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 :root[data-theme='dark'] {
   color-scheme: dark;
-  --bg: #111310;
-  --surface: #1a1d18;
-  --surface-2: #242820;
-  --ink: #f2f4ec;
-  --muted: #aeb5a7;
-  --line: #3b4136;
-  --accent: #d7ff45;
-  --accent-ink: #182000;
-  --signal: #ff7b5e;
-  --cyan: #67d7cc;
-  --shadow: 0 20px 48px rgb(0 0 0 / 28%);
+  --bg: oklch(17% 0.014 118);
+  --surface: oklch(21% 0.016 118);
+  --surface-2: oklch(26% 0.022 118);
+  --ink: oklch(95% 0.012 108);
+  --muted: oklch(73% 0.025 112);
+  --line: oklch(34% 0.026 116);
+  --accent: oklch(92% 0.235 120);
+  --accent-hover: oklch(87% 0.225 120);
+  --accent-ink: oklch(21% 0.055 120);
+  --signal: oklch(73% 0.18 35);
+  --cyan: oklch(76% 0.105 188);
+  --focus: oklch(76% 0.14 220);
+  --shadow: 0 20px 48px oklch(5% 0.01 118 / 30%);
+  --shadow-strong: 0 28px 72px oklch(5% 0.01 118 / 42%);
 }
 
 * {
@@ -45,10 +52,10 @@ html {
 
 body {
   margin: 0;
-  min-width: 320px;
+  min-width: 0;
   background: var(--bg);
   color: var(--ink);
-  font-family: 'Inter Variable', Inter, ui-sans-serif, system-ui, sans-serif;
+  font-family: 'DM Sans Variable', 'Microsoft YaHei', sans-serif;
   font-size: 16px;
   line-height: 1.65;
   letter-spacing: 0;
@@ -58,6 +65,7 @@ body {
 a {
   color: inherit;
   text-decoration: none;
+  transition: color 160ms var(--ease-out);
 }
 
 button,
@@ -70,6 +78,11 @@ input {
 button,
 a {
   -webkit-tap-highlight-color: transparent;
+}
+
+:where(a, button, input, summary):focus-visible {
+  outline: 3px solid var(--focus);
+  outline-offset: 3px;
 }
 
 img {
@@ -113,7 +126,7 @@ img {
 }
 
 .section {
-  padding-block: 88px;
+  padding-block: 96px;
 }
 
 .section--compact {
@@ -121,8 +134,8 @@ img {
 }
 
 .section--ink {
-  background: #111310;
-  color: #f2f4ec;
+  background: oklch(17% 0.014 118);
+  color: oklch(95% 0.012 108);
 }
 
 .section--line {
@@ -168,28 +181,39 @@ img {
 
 .button {
   display: inline-flex;
-  min-height: 44px;
+  min-height: 48px;
   align-items: center;
   justify-content: center;
   gap: 9px;
-  padding: 10px 15px;
+  padding: 11px 16px;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--surface);
   color: var(--ink);
   font-weight: 680;
-  transition: background-color 160ms ease, border-color 160ms ease, transform 160ms ease;
+  transition: background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), color 160ms var(--ease-out), transform 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
 }
 
 .button:hover {
   border-color: var(--ink);
   transform: translateY(-1px);
+  box-shadow: 0 8px 20px oklch(20% 0.018 118 / 10%);
+}
+
+.button:active {
+  transform: translateY(0);
+  box-shadow: none;
 }
 
 .button--accent {
   border-color: var(--accent);
   background: var(--accent);
   color: var(--accent-ink);
+}
+
+.button--accent:hover {
+  border-color: var(--accent-hover);
+  background: var(--accent-hover);
 }
 
 .button--ghost {
@@ -200,18 +224,24 @@ img {
 
 .icon-button {
   display: inline-grid;
-  width: 40px;
-  height: 40px;
-  flex: 0 0 40px;
+  width: 42px;
+  height: 42px;
+  flex: 0 0 42px;
   place-items: center;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: transparent;
   cursor: pointer;
+  transition: background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), color 160ms var(--ease-out), transform 160ms var(--ease-out);
 }
 
 .icon-button:hover {
+  border-color: var(--ink);
   background: var(--surface-2);
+}
+
+.icon-button:active {
+  transform: scale(0.96);
 }
 
 .tag-list {
@@ -249,6 +279,12 @@ img {
   align-items: start;
   padding-block: 26px;
   border-bottom: 1px solid var(--line);
+  transition: background-color 160ms var(--ease-out);
+}
+
+.content-row:hover,
+.content-row:focus-within {
+  background: color-mix(in oklch, var(--surface-2) 45%, transparent);
 }
 
 .content-row__meta {
@@ -300,6 +336,16 @@ img {
   border-radius: 6px;
   background: transparent;
   cursor: pointer;
+  transition: background-color 160ms var(--ease-out), border-color 160ms var(--ease-out), color 160ms var(--ease-out), transform 160ms var(--ease-out);
+}
+
+.filter-button:hover {
+  border-color: var(--ink);
+  transform: translateY(-1px);
+}
+
+.filter-button:active {
+  transform: scale(0.98);
 }
 
 .filter-button[aria-pressed='true'] {
@@ -318,6 +364,12 @@ img {
   border: 1px solid var(--line);
   border-radius: 6px;
   background: var(--surface);
+  transition: border-color 160ms var(--ease-out), box-shadow 160ms var(--ease-out);
+}
+
+.search-box:focus-within {
+  border-color: var(--focus);
+  box-shadow: 0 0 0 3px color-mix(in oklch, var(--focus) 20%, transparent);
 }
 
 .search-box input {
@@ -328,8 +380,12 @@ img {
   background: transparent;
 }
 
+.search-box input:focus-visible {
+  outline: 0;
+}
+
 .article-shell {
-  width: min(calc(100% - 40px), 860px);
+  width: min(calc(100% - 40px), 820px);
   margin-inline: auto;
 }
 
@@ -361,6 +417,10 @@ img {
 .prose {
   padding-block: 48px 96px;
   font-size: 17px;
+}
+
+.prose > :first-child {
+  margin-top: 0;
 }
 
 .prose h2,
@@ -460,7 +520,7 @@ img {
   }
 
   .section {
-    padding-block: 64px;
+    padding-block: 72px;
   }
 
   .section-heading {

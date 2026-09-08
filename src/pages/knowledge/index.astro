@@ -1,6 +1,6 @@
 ---
 import { getCollection } from 'astro:content'
-import { ArrowRight, Search } from 'lucide-astro'
+import { ArrowRight, Search, X } from 'lucide-astro'
 import BaseLayout from '../../layouts/BaseLayout.astro'
 import { byNewest, formatDate } from '../../utils/content'
 
@@ -15,10 +15,16 @@ const entries = (await getCollection('knowledge')).sort(byNewest)
   </header>
 
   <section class="section--compact shell">
-    <label class="search-box" for="knowledge-search">
-      <Search size={18} aria-hidden="true" />
-      <input id="knowledge-search" type="search" placeholder="搜索标题、摘要或标签" autocomplete="off" />
-    </label>
+    <div class="search-wrap">
+      <label class="search-box" for="knowledge-search">
+        <Search size={18} aria-hidden="true" />
+        <input id="knowledge-search" type="search" placeholder="搜索标题、摘要或标签" autocomplete="off" aria-describedby="knowledge-status" />
+      </label>
+      <button class="icon-button search-clear" id="knowledge-clear" type="button" title="清除搜索" aria-label="清除搜索" hidden>
+        <X size={18} aria-hidden="true" />
+      </button>
+    </div>
+    <p class="search-status" id="knowledge-status" role="status" aria-live="polite">共 {entries.length} 条知识记录</p>
 
     <div class="content-list" id="knowledge-list">
       {entries.map((entry) => (
@@ -43,9 +49,11 @@ const entries = (await getCollection('knowledge')).sort(byNewest)
   const input = document.querySelector<HTMLInputElement>('#knowledge-search')
   const rows = [...document.querySelectorAll<HTMLElement>('[data-search]')]
   const empty = document.querySelector<HTMLElement>('#knowledge-empty')
+  const clear = document.querySelector<HTMLButtonElement>('#knowledge-clear')
+  const status = document.querySelector<HTMLElement>('#knowledge-status')
 
-  input?.addEventListener('input', () => {
-    const query = input.value.trim().toLowerCase()
+  const updateResults = () => {
+    const query = input?.value.trim().toLowerCase() ?? ''
     let visible = 0
     for (const row of rows) {
       const matches = query.length === 0 || row.dataset.search?.includes(query)
@@ -53,6 +61,23 @@ const entries = (await getCollection('knowledge')).sort(byNewest)
       if (matches) visible += 1
     }
     if (empty) empty.style.display = visible === 0 ? 'block' : 'none'
+    if (clear) clear.hidden = query.length === 0
+    if (status) status.textContent = query.length === 0
+      ? `共 ${visible} 条知识记录`
+      : `“${input?.value.trim()}”找到 ${visible} 条结果`
+  }
+
+  input?.addEventListener('input', updateResults)
+  input?.addEventListener('keydown', (event) => {
+    if (event.key !== 'Escape' || !input.value) return
+    input.value = ''
+    updateResults()
+  })
+  clear?.addEventListener('click', () => {
+    if (!input) return
+    input.value = ''
+    updateResults()
+    input.focus()
   })
 </script>
 
@@ -63,5 +88,28 @@ const entries = (await getCollection('knowledge')).sort(byNewest)
 
   .knowledge-tags {
     margin-top: 16px;
+  }
+
+  .search-wrap {
+    display: flex;
+    max-width: 616px;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .search-box {
+    width: 100%;
+    margin-bottom: 0;
+  }
+
+  .search-clear[hidden] {
+    display: none;
+  }
+
+  .search-status {
+    margin: 12px 0 30px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 12px;
   }
 </style>

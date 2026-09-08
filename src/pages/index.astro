@@ -1,53 +1,61 @@
 ---
 import { getCollection } from 'astro:content'
-import { ArrowRight, BookOpen, Github, Layers3, PackageCheck, Wrench } from 'lucide-astro'
+import { ArrowDown, ArrowRight, BookOpen, Github, Layers3, PackageCheck, Wrench } from 'lucide-astro'
 import ProjectCard from '../components/ProjectCard.astro'
 import BaseLayout from '../layouts/BaseLayout.astro'
 import { site } from '../data/site'
 import { byNewest, formatDate } from '../utils/content'
 
 const projects = (await getCollection('projects')).sort(byNewest)
-const featuredProjects = projects.filter((entry) => entry.data.featured).slice(0, 4)
-const skills = (await getCollection('skills')).sort(byNewest).slice(0, 3)
-const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
+const featuredProjects = projects.filter((entry) => entry.data.featured).slice(0, 3)
+const allSkills = (await getCollection('skills')).sort(byNewest)
+const skills = allSkills.slice(0, 3)
+const publishedSkillCount = allSkills.filter((entry) => entry.data.skillhub).length
+const allKnowledge = (await getCollection('knowledge')).sort(byNewest)
+const knowledge = allKnowledge.slice(0, 4)
 ---
 
 <BaseLayout>
   <section class="hero" aria-labelledby="hero-title">
     <div class="hero__veil" aria-hidden="true"></div>
     <div class="hero__content shell">
-      <p class="hero__eyebrow">AI systems / desktop / agent skills</p>
-      <h1 id="hero-title">zp-home</h1>
-      <p class="hero__copy">不只展示做出了什么，也记录问题如何复现、根因怎样定位、方案为什么取舍，以及哪些验证仍然没有完成。</p>
-      <div class="button-row">
-        <a class="button button--accent" href="/projects/">查看项目 <ArrowRight size={17} /></a>
-        <a class="button button--ghost" href={site.github} target="_blank" rel="noreferrer"><Github size={17} /> GitHub</a>
+      <div class="hero__main">
+        <p class="hero__eyebrow">Independent builder / systems practice</p>
+        <h1 id="hero-title">zp-home</h1>
+        <p class="hero__copy">把 AI 工具做成能运行的产品，把工程经验整理成可以复用、可以验证的能力。</p>
+        <div class="button-row">
+          <a class="button button--accent" href="/projects/">查看项目 <ArrowRight size={17} aria-hidden="true" /></a>
+          <a class="button button--ghost" href={site.github} target="_blank" rel="noreferrer"><Github size={17} aria-hidden="true" /> GitHub</a>
+        </div>
       </div>
-      <ul class="hero__focus" aria-label="关注方向">
-        {site.focus.map((item) => <li>{item}</li>)}
-      </ul>
+      <div class="hero__foot">
+        <ul class="hero__focus" aria-label="关注方向">
+          {site.focus.map((item) => <li>{item}</li>)}
+        </ul>
+        <a class="hero__scroll" href="#selected-work">精选案例 <ArrowDown size={16} aria-hidden="true" /></a>
+      </div>
     </div>
   </section>
 
   <section class="signal-band" aria-label="公开工作概览">
     <div class="shell signal-grid">
-      <div><strong>30+</strong><span>公开仓库</span></div>
-      <div><strong>6</strong><span>SkillHub 已发布 Skills</span></div>
-      <div><strong>Public</strong><span>来源可检查</span></div>
+      <div><small>01</small><strong>{String(projects.length).padStart(2, '0')}</strong><span>项目记录</span></div>
+      <div><small>02</small><strong>{String(publishedSkillCount).padStart(2, '0')}</strong><span>SkillHub 已发布</span></div>
+      <div><small>03</small><strong>{String(allKnowledge.length).padStart(2, '0')}</strong><span>知识条目</span></div>
     </div>
   </section>
 
-  <section class="section">
+  <section class="section" id="selected-work">
     <div class="shell">
       <div class="section-heading">
         <div>
           <p class="eyebrow">Selected work</p>
-          <h2>从插件生态到桌面交付</h2>
+          <h2>把问题做成可以验证的系统</h2>
         </div>
         <p>项目页区分个人项目与开源协作，用 Issue、PR、测试与失败记录还原真实开发过程。</p>
       </div>
-      <div class="project-grid">
-        {featuredProjects.map((project) => <ProjectCard project={project} eager />)}
+      <div class="project-grid project-grid--featured">
+        {featuredProjects.map((project, index) => <ProjectCard project={project} lead={index === 0} eager={index === 0} />)}
       </div>
       <div class="section-link">
         <a class="button" href="/projects/">全部项目 <ArrowRight size={17} /></a>
@@ -60,7 +68,7 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
       <div class="section-heading">
         <div>
           <p class="eyebrow">Working system</p>
-          <h2>产品、能力、知识形成闭环</h2>
+          <h2>工作不是孤立的交付</h2>
         </div>
         <p>项目暴露真实问题，Skill 固化解决流程，知识记录保留可以复查的判断依据。</p>
       </div>
@@ -97,9 +105,12 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
         <p>每项能力都有明确触发场景、执行边界和验证方式，不是单次任务的提示词副本。</p>
       </div>
       <div class="skill-grid">
-        {skills.map((skill) => (
+        {skills.map((skill, index) => (
           <a class="skill-item" href={`/skills/${skill.id}/`}>
-            <PackageCheck size={22} />
+            <div class="skill-item__top">
+              <PackageCheck size={22} aria-hidden="true" />
+              <span>0{index + 1}</span>
+            </div>
             <span class="skill-item__kind">{skill.data.kind}</span>
             <h3>{skill.data.title}</h3>
             <p>{skill.data.summary}</p>
@@ -144,11 +155,10 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
 <style>
   .hero {
     position: relative;
-    display: flex;
-    min-height: 650px;
-    align-items: end;
+    height: clamp(560px, calc(100svh - var(--header) - 48px), 720px);
+    min-height: 560px;
     isolation: isolate;
-    background-color: #1a211d;
+    background-color: oklch(17% 0.014 118);
     background-image: url('/images/project-desktop.webp');
     background-position: center;
     background-size: cover;
@@ -159,11 +169,19 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
     position: absolute;
     z-index: -1;
     inset: 0;
-    background: rgb(7 10 8 / 64%);
+    background: rgb(7 10 8 / 79%);
   }
 
   .hero__content {
-    padding-block: 90px 54px;
+    display: grid;
+    height: 100%;
+    grid-template-rows: 1fr auto;
+    padding-block: 72px 32px;
+  }
+
+  .hero__main {
+    align-self: end;
+    padding-bottom: 48px;
   }
 
   .hero__eyebrow {
@@ -178,16 +196,16 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
   .hero h1 {
     max-width: 900px;
     margin: 0;
-    font-size: 84px;
-    font-weight: 780;
+    font-size: 92px;
+    font-weight: 760;
     line-height: 0.98;
     letter-spacing: 0;
   }
 
   .hero__copy {
-    max-width: 690px;
+    max-width: 650px;
     margin: 24px 0 30px;
-    color: #e2e7de;
+    color: oklch(91% 0.018 110);
     font-size: 22px;
     line-height: 1.5;
   }
@@ -196,9 +214,8 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
     display: flex;
     flex-wrap: wrap;
     gap: 10px 22px;
-    margin: 52px 0 0;
-    padding: 18px 0 0;
-    border-top: 1px solid rgb(255 255 255 / 38%);
+    margin: 0;
+    padding: 0;
     list-style: none;
     font-family: 'JetBrains Mono Variable', monospace;
     font-size: 12px;
@@ -208,6 +225,29 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
     content: '•';
     margin-right: 8px;
     color: var(--signal);
+  }
+
+  .hero__foot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 28px;
+    padding-top: 24px;
+    border-top: 1px solid rgb(255 255 255 / 32%);
+  }
+
+  .hero__scroll {
+    display: inline-flex;
+    flex: 0 0 auto;
+    align-items: center;
+    gap: 8px;
+    color: oklch(86% 0.018 110);
+    font-size: 13px;
+    font-weight: 680;
+  }
+
+  .hero__scroll:hover {
+    color: var(--accent);
   }
 
   .signal-band {
@@ -225,7 +265,7 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
     display: flex;
     min-height: 92px;
     align-items: center;
-    gap: 14px;
+    gap: 16px;
     padding: 20px 28px;
     border-right: 1px solid rgb(24 32 0 / 24%);
   }
@@ -241,6 +281,12 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
   .signal-grid strong {
     font-size: 28px;
     line-height: 1;
+  }
+
+  .signal-grid small {
+    color: color-mix(in oklch, var(--accent-ink) 58%, transparent);
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 11px;
   }
 
   .signal-grid span {
@@ -300,13 +346,27 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
   .skill-item {
     position: relative;
     display: block;
-    min-height: 290px;
-    padding: 26px;
+    min-height: 280px;
+    padding: 28px;
     background: var(--surface);
+    transition: background-color 180ms var(--ease-out), color 180ms var(--ease-out);
   }
 
-  .skill-item:hover {
+  .skill-item:hover,
+  .skill-item:focus-visible {
     background: var(--surface-2);
+  }
+
+  .skill-item__top {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+
+  .skill-item__top span {
+    color: var(--muted);
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 11px;
   }
 
   .skill-item__kind {
@@ -336,11 +396,17 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
 
   @media (max-width: 820px) {
     .hero {
-      min-height: 560px;
+      height: calc(100svh - var(--header) - 32px);
+      min-height: 520px;
+      max-height: 640px;
     }
 
     .hero__content {
-      padding-block: 74px 38px;
+      padding-block: 56px 24px;
+    }
+
+    .hero__main {
+      padding-bottom: 32px;
     }
 
     .hero h1 {
@@ -352,7 +418,7 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
     }
 
     .hero__focus {
-      margin-top: 36px;
+      max-width: 520px;
     }
 
     .signal-grid,
@@ -396,20 +462,37 @@ const knowledge = (await getCollection('knowledge')).sort(byNewest).slice(0, 4)
 
   @media (max-width: 520px) {
     .hero {
-      min-height: 540px;
+      height: calc(100svh - var(--header) - 24px);
+      min-height: 480px;
+      max-height: 620px;
       background-position: 62% center;
     }
 
     .hero h1 {
-      font-size: 49px;
+      font-size: 58px;
     }
 
     .hero__copy {
-      max-width: 330px;
+      max-width: 350px;
+      margin-block: 18px 24px;
+      font-size: 18px;
     }
 
     .hero__focus {
       gap: 8px 16px;
+    }
+
+    .hero__focus li:nth-child(n + 4) {
+      display: none;
+    }
+
+    .hero__scroll {
+      width: 40px;
+      height: 40px;
+      justify-content: center;
+      overflow: hidden;
+      color: #fff;
+      font-size: 0;
     }
   }
 </style>

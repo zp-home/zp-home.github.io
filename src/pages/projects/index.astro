@@ -21,7 +21,8 @@ const projects = (await getCollection('projects')).sort(byNewest)
       <button class="filter-button" type="button" data-filter="agent">Agent 能力</button>
       <button class="filter-button" type="button" data-filter="automation">自动化</button>
     </div>
-    <div class="project-grid" id="project-grid">
+    <p class="filter-status" id="project-status" role="status" aria-live="polite">显示全部 {projects.length} 个项目</p>
+    <div class="project-grid" id="project-grid" aria-describedby="project-status">
       {projects.map((project) => <ProjectCard project={project} />)}
     </div>
     <p class="empty-state" id="project-empty">当前筛选下没有项目。</p>
@@ -38,18 +39,58 @@ const projects = (await getCollection('projects')).sort(byNewest)
   const buttons = [...document.querySelectorAll<HTMLButtonElement>('[data-filter]')]
   const cards = [...document.querySelectorAll<HTMLElement>('[data-tags]')]
   const empty = document.querySelector<HTMLElement>('#project-empty')
+  const status = document.querySelector<HTMLElement>('#project-status')
+  const labels = new Map(buttons.map((button) => [button.dataset.filter ?? 'all', button.textContent?.trim() ?? '全部']))
 
-  for (const button of buttons) {
-    button.addEventListener('click', () => {
-      const filter = button.dataset.filter ?? 'all'
-      let visible = 0
-      for (const candidate of buttons) candidate.setAttribute('aria-pressed', String(candidate === button))
-      for (const card of cards) {
-        const matches = filter === 'all' || aliases[filter]?.some((tag) => card.dataset.tags?.includes(tag))
-        card.hidden = !matches
-        if (matches) visible += 1
-      }
-      if (empty) empty.style.display = visible === 0 ? 'block' : 'none'
+  const applyFilter = (filter: string, updateUrl = true) => {
+    const activeFilter = labels.has(filter) ? filter : 'all'
+    let visible = 0
+
+    for (const candidate of buttons) {
+      candidate.setAttribute('aria-pressed', String(candidate.dataset.filter === activeFilter))
+    }
+    for (const card of cards) {
+      const matches = activeFilter === 'all' || aliases[activeFilter]?.some((tag) => card.dataset.tags?.includes(tag))
+      card.hidden = !matches
+      if (matches) visible += 1
+    }
+
+    if (empty) empty.style.display = visible === 0 ? 'block' : 'none'
+    if (status) status.textContent = activeFilter === 'all'
+      ? `显示全部 ${visible} 个项目`
+      : `${labels.get(activeFilter)}：${visible} 个项目`
+
+    if (updateUrl) {
+      const url = new URL(window.location.href)
+      if (activeFilter === 'all') url.searchParams.delete('filter')
+      else url.searchParams.set('filter', activeFilter)
+      history.replaceState({}, '', url)
+    }
+  }
+
+  for (const [index, button] of buttons.entries()) {
+    button.addEventListener('click', () => applyFilter(button.dataset.filter ?? 'all'))
+    button.addEventListener('keydown', (event) => {
+      if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return
+      event.preventDefault()
+      const nextIndex = event.key === 'Home'
+        ? 0
+        : event.key === 'End'
+          ? buttons.length - 1
+          : (index + (event.key === 'ArrowRight' ? 1 : -1) + buttons.length) % buttons.length
+      buttons[nextIndex]?.focus()
+      applyFilter(buttons[nextIndex]?.dataset.filter ?? 'all')
     })
   }
+
+  applyFilter(new URL(window.location.href).searchParams.get('filter') ?? 'all', false)
 </script>
+
+<style>
+  .filter-status {
+    margin: -14px 0 24px;
+    color: var(--muted);
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 12px;
+  }
+</style>

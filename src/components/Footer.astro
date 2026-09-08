@@ -1,40 +1,92 @@
 ---
 import { ArrowUpRight, Blocks, GitBranch, Github } from 'lucide-astro'
 import { site } from '../data/site'
+
+const year = new Date().getFullYear()
 ---
 
 <footer class="site-footer">
-  <div class="shell footer-grid">
-    <div>
-      <p class="footer-title">zp-home</p>
-      <p class="footer-copy">公开作品、可复用能力与持续更新的技术笔记。</p>
+  <div class="footer-callout">
+    <div class="shell footer-callout__inner">
+      <div>
+        <p class="eyebrow">Open work / open conversation</p>
+        <h2>从公开问题开始交流。</h2>
+        <p>项目、验证过程和未完成事项都保留在仓库里，欢迎带着具体上下文来讨论。</p>
+      </div>
+      <a class="button button--accent" href={site.github} target="_blank" rel="noreferrer">
+        查看 GitHub <ArrowUpRight size={17} aria-hidden="true" />
+      </a>
     </div>
-    <div class="footer-links">
-      <a href={site.github} target="_blank" rel="noreferrer">
-        <Github size={17} /> GitHub <ArrowUpRight size={15} />
-      </a>
-      <a href={site.gitee} target="_blank" rel="noreferrer">
-        <GitBranch size={17} /> Gitee yr_binary <ArrowUpRight size={15} />
-      </a>
-      <a href={site.skillhub} target="_blank" rel="noreferrer">
-        <Blocks size={17} /> SkillHub {site.skillhubHandle} <ArrowUpRight size={15} />
-      </a>
-      <a href="/knowledge/">Knowledge</a>
-      <a href="/skills/">Skills</a>
+  </div>
+
+  <div class="shell footer-grid">
+    <div class="footer-identity">
+      <p class="footer-title">zp-home</p>
+      <p class="footer-copy">AI 产品工程、桌面系统与 Agent Skills。</p>
+      <span>© {year} zp-home</span>
+    </div>
+    <div class="footer-links" aria-label="站点与外部链接">
+      <div>
+        <a href="/projects/">项目</a>
+        <a href="/skills/">Skills</a>
+        <a href="/knowledge/">知识</a>
+      </div>
+      <div>
+        <a href={site.github} target="_blank" rel="noreferrer"><Github size={17} aria-hidden="true" /> GitHub</a>
+        <a href={site.gitee} target="_blank" rel="noreferrer"><GitBranch size={17} aria-hidden="true" /> Gitee</a>
+        <a href={site.skillhub} target="_blank" rel="noreferrer"><Blocks size={17} aria-hidden="true" /> SkillHub</a>
+      </div>
     </div>
   </div>
 </footer>
 
 <style>
   .site-footer {
-    padding-block: 46px;
     border-top: 1px solid var(--line);
+  }
+
+  .footer-callout {
+    border-bottom: 1px solid oklch(21% 0.04 120 / 24%);
+    background: var(--accent);
+    color: var(--accent-ink);
+  }
+
+  .footer-callout__inner {
+    display: flex;
+    min-height: 260px;
+    align-items: end;
+    justify-content: space-between;
+    gap: 48px;
+    padding-block: 48px;
+  }
+
+  .footer-callout .eyebrow {
+    color: var(--accent-ink);
+  }
+
+  .footer-callout h2 {
+    max-width: 720px;
+    margin: 0;
+    font-size: 48px;
+    line-height: 1.05;
+  }
+
+  .footer-callout p:last-child {
+    max-width: 660px;
+    margin: 16px 0 0;
+    font-size: 17px;
+  }
+
+  .footer-callout .button {
+    flex: 0 0 auto;
+    border-color: var(--accent-ink);
   }
 
   .footer-grid {
     display: flex;
     justify-content: space-between;
-    gap: 32px;
+    gap: 48px;
+    padding-block: 48px;
   }
 
   .footer-title {
@@ -44,15 +96,26 @@ import { site } from '../data/site'
   }
 
   .footer-copy {
-    margin: 0;
+    margin: 0 0 20px;
     color: var(--muted);
   }
 
+  .footer-identity > span {
+    color: var(--muted);
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 12px;
+  }
+
   .footer-links {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: 18px;
+    display: grid;
+    grid-template-columns: repeat(2, minmax(120px, 1fr));
+    gap: 48px;
+  }
+
+  .footer-links > div {
+    display: grid;
+    align-content: start;
+    gap: 12px;
   }
 
   .footer-links a {
@@ -62,9 +125,29 @@ import { site } from '../data/site'
     font-weight: 620;
   }
 
+  .footer-links a:hover {
+    color: var(--cyan);
+  }
+
   @media (max-width: 640px) {
+    .footer-callout__inner {
+      min-height: 0;
+      align-items: flex-start;
+      flex-direction: column;
+      gap: 28px;
+      padding-block: 48px;
+    }
+
+    .footer-callout h2 {
+      font-size: 36px;
+    }
+
     .footer-grid {
       flex-direction: column;
+    }
+
+    .footer-links {
+      gap: 32px;
     }
   }
 </style>

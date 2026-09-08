@@ -1,12 +1,12 @@
 ---
-import { Blocks, GitBranch, Github, Menu, Moon, Sun, X } from 'lucide-astro'
+import { ArrowUpRight, Blocks, GitBranch, Github, Menu, Moon, Sun, X } from 'lucide-astro'
 import { site } from '../data/site'
 
 const pathname = Astro.url.pathname
 const links = [
-  { href: '/projects/', label: 'Projects' },
+  { href: '/projects/', label: '项目' },
   { href: '/skills/', label: 'Skills' },
-  { href: '/knowledge/', label: 'Knowledge' },
+  { href: '/knowledge/', label: '知识' },
 ]
 ---
 
@@ -14,7 +14,7 @@ const links = [
   <div class="site-header__inner shell">
     <a class="brand" href="/" aria-label="zp-home 首页">
       <span class="brand__mark">ZP</span>
-      <span>zp-home</span>
+      <span class="brand__name">zp-home</span>
     </a>
 
     <nav class="desktop-nav" aria-label="主导航">
@@ -26,12 +26,14 @@ const links = [
     </nav>
 
     <div class="header-actions">
-      <a class="icon-button identity-action" href={site.skillhub} target="_blank" rel="noreferrer" title={`SkillHub ${site.skillhubHandle}`} aria-label={`打开 SkillHub ${site.skillhubHandle}`}>
-        <Blocks size={18} />
-      </a>
-      <a class="icon-button identity-action" href={site.gitee} target="_blank" rel="noreferrer" title="Gitee yr_binary" aria-label="打开 Gitee yr_binary">
-        <GitBranch size={18} />
-      </a>
+      <div class="header-actions__external">
+        <a class="icon-button identity-action" href={site.skillhub} target="_blank" rel="noreferrer" title={`SkillHub ${site.skillhubHandle}`} aria-label={`打开 SkillHub ${site.skillhubHandle}`}>
+          <Blocks size={18} />
+        </a>
+        <a class="icon-button identity-action" href={site.gitee} target="_blank" rel="noreferrer" title="Gitee yr_binary" aria-label="打开 Gitee yr_binary">
+          <GitBranch size={18} />
+        </a>
+      </div>
       <a class="icon-button" href={site.github} target="_blank" rel="noreferrer" title="GitHub" aria-label="打开 GitHub">
         <Github size={18} />
       </a>
@@ -47,34 +49,94 @@ const links = [
   </div>
 
   <nav class="mobile-nav" id="mobile-nav" aria-label="移动端导航" hidden>
-    {links.map((link) => (
-      <a href={link.href} aria-current={pathname.startsWith(link.href) ? 'page' : undefined}>
-        {link.label}
+    <div class="mobile-nav__primary shell">
+      {links.map((link, index) => (
+        <a href={link.href} aria-current={pathname.startsWith(link.href) ? 'page' : undefined}>
+          <span>0{index + 1}</span>
+          <strong>{link.label}</strong>
+          <ArrowUpRight size={19} aria-hidden="true" />
+        </a>
+      ))}
+    </div>
+    <div class="mobile-nav__external shell" aria-label="外部链接">
+      <a href={site.github} target="_blank" rel="noreferrer">
+        <Github size={17} aria-hidden="true" /> GitHub
       </a>
-    ))}
+      <a href={site.skillhub} target="_blank" rel="noreferrer">
+        <Blocks size={17} aria-hidden="true" /> SkillHub
+      </a>
+    </div>
   </nav>
 </header>
 
-<script is:inline>
+<script>
   (() => {
     const root = document.documentElement
-    const stored = localStorage.getItem('theme')
-    const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-    root.dataset.theme = stored || preferred
+    const themeButton = document.querySelector<HTMLButtonElement>('#theme-toggle')
+    const colorPreference = window.matchMedia('(prefers-color-scheme: dark)')
+    const themeColor = document.querySelector<HTMLMetaElement>('meta[name="theme-color"]')
 
-    document.querySelector('#theme-toggle')?.addEventListener('click', () => {
+    const syncThemeControl = () => {
+      const dark = root.dataset.theme === 'dark'
+      const label = dark ? '切换为浅色主题' : '切换为深色主题'
+      themeButton?.setAttribute('aria-label', label)
+      themeButton?.setAttribute('title', label)
+      themeColor?.setAttribute('content', dark ? '#171a16' : '#f3f5ed')
+    }
+
+    syncThemeControl()
+
+    themeButton?.addEventListener('click', () => {
       const next = root.dataset.theme === 'dark' ? 'light' : 'dark'
       root.dataset.theme = next
-      localStorage.setItem('theme', next)
+      root.dataset.themeSource = 'stored'
+      try {
+        localStorage.setItem('theme', next)
+      } catch {}
+      syncThemeControl()
     })
 
-    const button = document.querySelector('#menu-toggle')
-    const nav = document.querySelector('#mobile-nav')
+    colorPreference.addEventListener('change', (event) => {
+      if (root.dataset.themeSource !== 'system') return
+      root.dataset.theme = event.matches ? 'dark' : 'light'
+      syncThemeControl()
+    })
+
+    const header = document.querySelector<HTMLElement>('.site-header')
+    const button = document.querySelector<HTMLButtonElement>('#menu-toggle')
+    const nav = document.querySelector<HTMLElement>('#mobile-nav')
+
+    const setMenu = (open: boolean, restoreFocus = false) => {
+      if (!button || !nav) return
+      button.setAttribute('aria-expanded', String(open))
+      button.setAttribute('aria-label', open ? '关闭导航' : '打开导航')
+      nav.hidden = !open
+      document.body.classList.toggle('menu-open', open)
+      if (!open && restoreFocus) button.focus()
+    }
+
     button?.addEventListener('click', () => {
       const expanded = button.getAttribute('aria-expanded') === 'true'
-      button.setAttribute('aria-expanded', String(!expanded))
-      button.setAttribute('aria-label', expanded ? '打开导航' : '关闭导航')
-      if (nav instanceof HTMLElement) nav.hidden = expanded
+      setMenu(!expanded)
+    })
+
+    nav?.addEventListener('click', (event) => {
+      if (event.target instanceof Element && event.target.closest('a')) setMenu(false)
+    })
+
+    document.addEventListener('click', (event) => {
+      if (button?.getAttribute('aria-expanded') !== 'true') return
+      if (event.target instanceof Node && !header?.contains(event.target)) setMenu(false)
+    })
+
+    document.addEventListener('keydown', (event) => {
+      if (event.key === 'Escape' && button?.getAttribute('aria-expanded') === 'true') {
+        setMenu(false, true)
+      }
+    })
+
+    window.matchMedia('(min-width: 721px)').addEventListener('change', (event) => {
+      if (event.matches) setMenu(false)
     })
   })()
 </script>
@@ -86,8 +148,8 @@ const links = [
     top: 0;
     height: var(--header);
     border-bottom: 1px solid var(--line);
-    background: color-mix(in srgb, var(--bg) 92%, transparent);
-    backdrop-filter: blur(18px);
+    background: color-mix(in oklch, var(--bg) 90%, transparent);
+    backdrop-filter: blur(20px) saturate(120%);
   }
 
   .site-header__inner {
@@ -101,20 +163,26 @@ const links = [
     display: inline-flex;
     align-items: center;
     gap: 10px;
-    font-family: 'JetBrains Mono Variable', monospace;
-    font-size: 14px;
-    font-weight: 700;
+    font-size: 15px;
+    font-weight: 760;
   }
 
   .brand__mark {
     display: grid;
-    width: 34px;
-    height: 34px;
+    width: 36px;
+    height: 36px;
     place-items: center;
     border-radius: 5px;
     background: var(--accent);
     color: var(--accent-ink);
-    font-size: 12px;
+    font-family: 'JetBrains Mono Variable', monospace;
+    font-size: 11px;
+    transition: transform 180ms var(--ease-out), background-color 180ms var(--ease-out);
+  }
+
+  .brand:hover .brand__mark {
+    background: var(--accent-hover);
+    transform: rotate(-4deg);
   }
 
   .desktop-nav {
@@ -125,9 +193,24 @@ const links = [
   }
 
   .desktop-nav a {
+    position: relative;
+    padding-block: 24px;
     color: var(--muted);
     font-size: 14px;
-    font-weight: 620;
+    font-weight: 680;
+  }
+
+  .desktop-nav a::after {
+    position: absolute;
+    right: 0;
+    bottom: -1px;
+    left: 0;
+    height: 2px;
+    background: var(--accent-hover);
+    content: '';
+    transform: scaleX(0);
+    transform-origin: left;
+    transition: transform 180ms var(--ease-out);
   }
 
   .desktop-nav a:hover,
@@ -135,9 +218,23 @@ const links = [
     color: var(--ink);
   }
 
+  .desktop-nav a:hover::after,
+  .desktop-nav a[aria-current='page']::after {
+    transform: scaleX(1);
+  }
+
   .header-actions {
     display: flex;
+    align-items: center;
     gap: 8px;
+  }
+
+  .header-actions__external {
+    display: flex;
+    gap: 8px;
+    margin-right: 4px;
+    padding-right: 12px;
+    border-right: 1px solid var(--line);
   }
 
   .mobile-menu-button,
@@ -164,7 +261,19 @@ const links = [
   }
 
   @media (max-width: 720px) {
+    :global(body.menu-open) {
+      overflow: hidden;
+    }
+
+    .site-header__inner {
+      gap: 16px;
+    }
+
     .identity-action {
+      display: none;
+    }
+
+    .header-actions__external {
       display: none;
     }
 
@@ -181,21 +290,75 @@ const links = [
     }
 
     .mobile-nav:not([hidden]) {
-      display: grid;
+      display: block;
       position: absolute;
       top: var(--header);
       right: 0;
       left: 0;
-      padding: 10px 14px 18px;
       border-bottom: 1px solid var(--line);
       background: var(--bg);
-      box-shadow: var(--shadow);
+      box-shadow: var(--shadow-strong);
+      animation: menu-in 180ms var(--ease-out) both;
     }
 
-    .mobile-nav a {
-      padding: 13px 10px;
+    .mobile-nav__primary {
+      padding-block: 12px;
+    }
+
+    .mobile-nav__primary a {
+      display: grid;
+      grid-template-columns: 36px minmax(0, 1fr) auto;
+      align-items: center;
+      min-height: 64px;
+      padding-inline: 8px;
       border-bottom: 1px solid var(--line);
-      font-weight: 650;
+    }
+
+    .mobile-nav__primary a:last-child {
+      border-bottom: 0;
+    }
+
+    .mobile-nav__primary span {
+      color: var(--cyan);
+      font-family: 'JetBrains Mono Variable', monospace;
+      font-size: 11px;
+    }
+
+    .mobile-nav__primary strong {
+      font-size: 18px;
+    }
+
+    .mobile-nav__external {
+      display: flex;
+      gap: 20px;
+      padding-block: 16px 24px;
+      border-top: 1px solid var(--line);
+    }
+
+    .mobile-nav__external a {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      color: var(--muted);
+      font-size: 14px;
+      font-weight: 680;
+    }
+
+    @keyframes menu-in {
+      from {
+        opacity: 0;
+        transform: translateY(-8px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+  }
+
+  @media (max-width: 390px) {
+    .brand__name {
+      display: none;
     }
   }
 </style>

@@ -40,9 +40,16 @@ const socialImage = new URL(image, Astro.site)
     <meta name="twitter:image" content={socialImage} />
     <script is:inline>
       (() => {
-        const stored = localStorage.getItem('theme')
+        const root = document.documentElement
+        let stored = null
+        try {
+          stored = localStorage.getItem('theme')
+        } catch {}
+        if (stored !== 'light' && stored !== 'dark') stored = null
         const preferred = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-        document.documentElement.dataset.theme = stored || preferred
+        root.classList.add('js')
+        root.dataset.theme = stored || preferred
+        root.dataset.themeSource = stored ? 'stored' : 'system'
       })()
     </script>
     <script is:inline defer src="https://events.vercount.one/js"></script>
