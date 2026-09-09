@@ -1,16 +1,25 @@
 ---
-title: DSH Plugin Release Smoke Runner
-summary: 把“按精确 DSH 版本测试发布包”的文字规则变成可重复执行的 Docker 冷启动、探针、清理与脱敏报告流程。
-date: 2026-08-31
-tags: [Docker, Node.js, Testing, Open Source]
+title: DSH Plugin Engineering Workflow
+summary: 围绕插件创建、升级、测试和发布，补齐命名冲突检查、引导式工作流、Docker 冷启动与配对评测，把 Skill 说明变成可执行的证据链。
+date: 2026-09-08
+tags: [Docker, Node.js, Agent Skills, Evaluation]
 featured: true
 role: 开源贡献者
-status: 已合并
+status: 持续协作
 image: /images/project-dsh-plugin-upgrade-skill.png
 repository: https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill
 ---
 
-这项工作属于 `oh-my-dsh/dsh-plugin-upgrade-skill` 组织仓库，不是我的独立项目。我的贡献是已合并的 [PR #34](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/pull/34)：为 `plugin-test` 增加 Docker release smoke runner，共修改 6 个文件、增加 972 行，并通过仓库 CI。
+这项工作属于 `oh-my-dsh/dsh-plugin-upgrade-skill` 组织仓库，不是我的独立项目。最初我通过 [PR #34](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/pull/34) 为 `plugin-test` 增加 Docker release smoke runner；随后工作范围继续扩展到插件命名、中央注册表、生命周期编排和 Skill 配对评测。
+
+## 从一个测试工具扩展为工程工作流
+
+- [PR #34](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/pull/34) 把打包产物的精确版本冷启动变成可重复执行的 Docker 冒烟测试，修改 6 个文件、增加 972 行。
+- [PR #36](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/pull/36) 为 `plugin-write` 增加离线命名校验与中央注册表只读查询，修改 13 个文件、增加 1,721 行。
+- [PR #87](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/pull/87) 和 [PR #88](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/pull/88) 增加引导式生命周期编排与运行前菜单，让一次插件任务先明确目标、验证范围和权限边界。
+- [PR #112](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/pull/112) 提交 Claude Code + Opus 5 的有 Skill / 无 Skill 配对阶段报告，保留任务级得分与基准设施缺陷，而不是只报告平均分。
+
+这些改动已经合并。当前 [PR #190](https://github.com/oh-my-dsh/dsh-plugin-upgrade-skill/pull/190) 正在进一步接通中央注册表：默认完成离线校验和只读查询，保留原始索引 SHA-256，并把本地仓库写入与外部发布拆成两个授权边界。它仍在审查中，因此这里将其标为进行中的工作。
 
 ## 原来的问题：规则写得很完整，但每次仍要手工测试
 
